@@ -24,7 +24,7 @@ def fatal(s):
     sys.exit(1)
 
 class RigidVal:
-    class Error(Exception):
+    class AlreadySetError(Exception):
         pass
     
     def __init__(self):
@@ -32,7 +32,7 @@ class RigidVal:
 
     def set(self, val):
         if self.val is not None:
-            raise self.Error("value already set")
+            raise self.AlreadySetError()
         self.val = val
 
     def get(self):
@@ -57,7 +57,7 @@ def main():
                 rigid.set(deck.delete)
             elif opt == '-r':
                 rigid.set(deck.refresh_fstab)
-    except rigid.Error:
+    except rigid.AlreadySetError:
         fatal("conflicting deck options")
 
     func = rigid.get()
