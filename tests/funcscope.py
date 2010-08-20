@@ -1,9 +1,18 @@
+class Var:
+    def __init__(self):
+        self.var = None
+
 def foo():
-    var = None
+    class_var = Var()
+    normal_var = None
+    
     def set_var(val):
-        var = val
+        class_var.var = val
+        normal_var = val
+
     set_var(666)
-    print "var = " + `var`
+    print "class_var = " + `class_var.var`
+    print "normal_var = " + `normal_var`
 
 foo()
 
