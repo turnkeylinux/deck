@@ -2,7 +2,7 @@
 <leo_file>
 <leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
 <globals body_outline_ratio="0.5">
-	<global_window_position top="0" left="470" height="933" width="800"/>
+	<global_window_position top="0" left="612" height="933" width="658"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
 </globals>
 <preferences/>
@@ -13,11 +13,11 @@
 <v t="zaril.20100820193236"><vh>brainstorming</vh></v>
 <v t="zaril.20100820223439"><vh>terminology</vh></v>
 <v t="zaril.20100820192834"><vh>file/data structure</vh></v>
-<v t="zaril.20100820191018" a="E"><vh>cli syntax + psuedo-logic</vh></v>
+<v t="zaril.20100820191018" a="ETV"><vh>cli syntax + psuedo-logic</vh></v>
 </v>
 <v t="zaril.20100820224228" a="E"><vh>implementation</vh>
 <v t="zaril.20100820230804"><vh>fix useraufs to allow usage by root, limited to certain directories</vh></v>
-<v t="zaril.20100821001344" a="TV"><vh>deck a filesystem path</vh></v>
+<v t="zaril.20100821001344"><vh>deck a filesystem path</vh></v>
 <v t="zaril.20100821001344.1"><vh>deck a deck</vh></v>
 <v t="zaril.20100821001344.2"><vh>delete a deck</vh></v>
 <v t="zaril.20100821001344.3"><vh>get fstab functionality to work</vh></v>
@@ -43,8 +43,8 @@ deck -d dst
 	removes the struct
 	removes all structures with a ref count of zero
 
-deck -u dst
-    updates mounts of dst
+deck -r dst
+    refresh mounts of dst
 
 example usage:
     deck / deckedroot
@@ -177,7 +177,10 @@ by the allow_user directive.
 
 
 </t>
-<t tx="zaril.20100821001344">deck /path/to/directory deck1</t>
+<t tx="zaril.20100821001344">deck /path/to/directory deck1
+
+* TODO: cli code
+</t>
 <t tx="zaril.20100821001344.1">deck /path/to/deck1 deck2</t>
 <t tx="zaril.20100821001344.2">deck -d deck1</t>
 <t tx="zaril.20100821001344.3">will save sub-mounts in fstab and replicate them</t>
