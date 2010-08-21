@@ -82,7 +82,7 @@ _install: execproxy
 
 #	install -m 4755 _$(progname) $(PATH_BIN)/$(progname) # install SUID 
 	install -m 755 _$(progname) $(PATH_BIN)/$(progname)
-	cp -P $(progname)-* $(PATH_BIN)	
+	-cp -P $(progname)-* $(PATH_BIN)	
 
 install-nodoc: pycompile-nodoc _install
 
