@@ -60,6 +60,9 @@ def main():
     except rigid.AlreadySetError:
         fatal("conflicting deck options")
 
+    if not args:
+        usage()
+        
     func = rigid.get()
     if func is None:
         if len(args) == 2:
