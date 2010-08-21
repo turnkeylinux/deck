@@ -74,12 +74,15 @@ def main():
     if func is not deck.create and len(args) != 1:
         usage("bad number of arguments")
 
-    if func is deck.create:
-        source_path, new_deck = args
-        func(source_path, new_deck)
-    else:
-        existing_deck = args[0]
-        func(existing_deck)
+    try:
+        if func is deck.create:
+            source_path, new_deck = args
+            func(source_path, new_deck)
+        else:
+            existing_deck = args[0]
+            func(existing_deck)
+    except deck.Error, e:
+        fatal(e)
     
 if __name__=="__main__":
     main()
