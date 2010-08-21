@@ -3,6 +3,7 @@ from os.path import *
 import os
 import md5
 import time
+import shutil
 
 from paths import Paths
 
@@ -99,6 +100,25 @@ class Deck:
         deck.mount()
         return deck
 
+    @classmethod
+    def delete(cls, deck_path):
+        deck = cls(deck_path)
+        if deck.is_mounted():
+            deck.umount()
+        os.rmdir(deck_path)
+
+        shutil.rmtree(deck.struct_path)
+        level_ids = ( basename(level) for level in deck.levels[1:] )
+        for level_id in level_ids:
+
+            level_path = join(deck.paths.levels, level_id)
+            level_ref_path = join(deck.paths.levels_refs, level_id)
+
+            os.remove(join(level_ref_path, deck.name))
+            if len(os.listdir(level_ref_path)) == 0:
+                os.rmdir(level_ref_path)
+                shutil.rmtree(level_path)
+        
     def __init__(self, path):
         self.path = path
         self.paths = DeckPaths(path)
@@ -117,18 +137,24 @@ class Deck:
 
         self.levels = levels
 
+    def is_mounted(self):
+        return aufs.is_mounted(self.path)
+
     def mount(self):
-        if aufs.is_mounted(self.path):
+        if self.is_mounted():
             raise Error("`%s' already mounted" % self.path)
 
         aufs.mount(list(reversed(self.levels)), self.path)
 
     def umount(self):
-        if not aufs.is_mounted(self.path):
+        if not self.is_mounted():
             raise Error("`%s' not mounted" % self.path)
 
         aufs.umount(self.path)
         
+def create(source_path, deck_path):
+    Deck.init_create(source_path, deck_path)
+
 def mount(deck_path):
     Deck(deck_path).mount()
 
@@ -139,8 +165,6 @@ def refresh_fstab(deck_path):
     print "refresh_fstab(%s)" % deck_path
 
 def delete(deck_path):
-    print "delete(%s)" % deck_path
+    Deck.delete(deck_path)
 
-def create(source_path, deck_path):
-    Deck.init_create(source_path, deck_path)
 
