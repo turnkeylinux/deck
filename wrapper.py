@@ -158,6 +158,10 @@ class Commands:
         return len(self.commands)
     
 def main():
+    if "--version" in sys.argv:
+        print version.get_version()
+        sys.exit(0)
+
     install_path = os.path.dirname(__file__)
     if PATH_LIBEXEC:
         os.environ['PATH'] = os.path.join(install_path, PATH_LIBEXEC) + ":" + \
