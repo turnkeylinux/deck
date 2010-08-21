@@ -107,10 +107,11 @@ class Deck:
             deck.umount()
         os.rmdir(deck_path)
 
-        shutil.rmtree(deck.struct_path)
-        level_ids = ( basename(level) for level in deck.levels[1:] )
-        for level_id in level_ids:
+        symlinks = os.listdir(deck.struct_path)
+        symlinks.sort()
 
+        for symlink in symlinks[1:]:
+            level_id = basename(os.readlink(join(deck.struct_path, symlink)))
             level_path = join(deck.paths.levels, level_id)
             level_ref_path = join(deck.paths.levels_refs, level_id)
 
@@ -118,6 +119,8 @@ class Deck:
             if len(os.listdir(level_ref_path)) == 0:
                 os.rmdir(level_ref_path)
                 shutil.rmtree(level_path)
+
+        shutil.rmtree(deck.struct_path)
         
     def __init__(self, path):
         self.path = path
@@ -128,15 +131,6 @@ class Deck:
         if not isdir(self.struct_path):
             raise Error("not a deck `%s'" % path)
 
-        levels = []
-        for symlink in os.listdir(self.struct_path):
-            source = os.readlink(join(self.struct_path, symlink))
-            if not source.startswith("/"):
-                source = realpath(join(self.struct_path, source))
-            levels.append(source)
-
-        self.levels = levels
-
     def is_mounted(self):
         return aufs.is_mounted(self.path)
 
@@ -144,7 +138,18 @@ class Deck:
         if self.is_mounted():
             raise Error("`%s' already mounted" % self.path)
 
-        aufs.mount(list(reversed(self.levels)), self.path)
+        symlinks = os.listdir(self.struct_path)
+        symlinks.sort()
+        
+        levels = []
+        for symlink in symlinks:
+            source = os.readlink(join(self.struct_path, symlink))
+            if not source.startswith("/"):
+                source = realpath(join(self.struct_path, source))
+            levels.append(source)
+
+        levels.reverse()
+        aufs.mount(levels, self.path)
 
     def umount(self):
         if not self.is_mounted():
