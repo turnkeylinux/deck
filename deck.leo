@@ -13,11 +13,11 @@
 <v t="zaril.20100820193236"><vh>brainstorming</vh></v>
 <v t="zaril.20100820223439"><vh>terminology</vh></v>
 <v t="zaril.20100820192834"><vh>file/data structure</vh></v>
-<v t="zaril.20100820191018" a="ETV"><vh>cli syntax + psuedo-logic</vh></v>
+<v t="zaril.20100820191018" a="E"><vh>cli syntax + psuedo-logic</vh></v>
 </v>
 <v t="zaril.20100820224228" a="E"><vh>implementation</vh>
 <v t="zaril.20100820230804"><vh>fix useraufs to allow usage by root, limited to certain directories</vh></v>
-<v t="zaril.20100821001344"><vh>deck a filesystem path</vh></v>
+<v t="zaril.20100821001344" a="ETV"><vh>deck a filesystem path</vh></v>
 <v t="zaril.20100821001344.1"><vh>deck a deck</vh></v>
 <v t="zaril.20100821001344.2"><vh>delete a deck</vh></v>
 <v t="zaril.20100821001344.3"><vh>get fstab functionality to work</vh></v>
@@ -119,7 +119,7 @@ advantages:
         would replicate /proc and /sys mounts in a decked chroot
     
 * QUESTIONS
-Q: what would happen to unmounted alts?
+Q: what would happen to unmounted decks?
 A:
 	they would be remounted with the existing overlays?
 ---
@@ -160,7 +160,15 @@ A:		no, because it would allow you to bypass grsecurity restrictions
 Q: what changes do we need to make to useraufs to support both root and users?
 A:
     limit root useraufs to specific directories
-</t>
+---
+Q: what happens when we branch from a deck?
+A:
+    we clone the deck structure, and add an overlay to both the original and new deck
+    if the original deck is mounted, 
+        remount the last level as readonly
+        insert the last overlay as writeable
+
+    </t>
 <t tx="zaril.20100820223439">deck
     a virtual filesystem branch derived from a directory or another deck
 
@@ -179,7 +187,14 @@ by the allow_user directive.
 </t>
 <t tx="zaril.20100821001344">deck /path/to/directory deck1
 
-* TODO: cli code
+create(src, dst)
+    raise exception if src isn't a directory
+    raise exception if dst has already been initialized or is not an empty directory
+
+    calculate level id
+    create a new level
+    create the deck structure
+    create the reference
 </t>
 <t tx="zaril.20100821001344.1">deck /path/to/deck1 deck2</t>
 <t tx="zaril.20100821001344.2">deck -d deck1</t>
