@@ -3,6 +3,7 @@ from os.path import *
 import os
 import md5
 import time
+import errno
 import shutil
 
 from paths import Paths
@@ -31,9 +32,23 @@ def make_relative(root, path):
         root = dirname(root).rstrip('/')
         up_count += 1
 
+def makedirs(path):
+    try:
+        os.makedirs(path)
+    except OSError, e:
+        if e[0] != errno.EEXIST:
+            raise
+
 class Error(Exception):
     pass
 
+def is_deck(path):
+    try:
+        Deck(path)
+        return True
+    except Error:
+        return False
+    
 class DeckPaths(Paths):
     def __init__(self, path=None):
         path = join(dirname(realpath(path)), ".deck")
@@ -61,14 +76,15 @@ class DeckStorage:
 
         return level_id
 
-    def add_level(self):
-        level_id = self._new_level_id()
+    def add_level(self, level_id=None):
+        if level_id is None:
+            level_id = self._new_level_id()
         
         level_path = join(self.paths.levels, level_id)
         level_ref_path = join(self.paths.levels_refs, level_id)
 
-        os.makedirs(level_path)
-        os.makedirs(level_ref_path)
+        makedirs(level_path)
+        makedirs(level_ref_path)
 
         # link the new level into the next position on the deck's struct
         struct_next_pos = max(map(int, os.listdir(self.struct_path))) + 1
@@ -89,8 +105,21 @@ class DeckStorage:
         if not isdir(source_path):
             raise Error("source `%s' is not a directory" % source_path)
 
-        os.makedirs(self.struct_path)
-        os.symlink(realpath(source_path), join(self.struct_path, "0"))
+        makedirs(self.struct_path)
+        if is_deck(source_path):
+            source = Deck(source_path)
+            if source.storage.paths.path != self.paths.path:
+                raise Error("cannot branch a new deck from a deck in another directory")
+
+            levels = source.storage.get_levels()
+            os.symlink(levels[0], join(self.struct_path, "0"))
+            for level in levels[1:]:
+                level_id = basename(level)
+                self.add_level(level_id)
+
+            source.add_level()
+        else:
+            os.symlink(realpath(source_path), join(self.struct_path, "0"))
 
         self.add_level()
         
@@ -141,7 +170,7 @@ class Deck:
         storage = DeckStorage(deck_path)
         storage.create(source_path)
 
-        os.makedirs(deck_path)
+        makedirs(deck_path)
         deck = cls(deck_path)
         deck.mount()
 
@@ -179,6 +208,14 @@ class Deck:
             raise Error("`%s' not mounted" % self.path)
 
         aufs.umount(self.path)
+
+    def add_level(self):
+        self.storage.add_level()
+        if self.is_mounted():
+            beforelast, last = self.storage.get_levels()[-2:]
+            operations = ("mod:%s=ro" % beforelast,
+                          "prepend:%s=rw" % last)
+            aufs.remount(operations, self.path)
         
 def create(source_path, deck_path):
     Deck.init_create(source_path, deck_path)

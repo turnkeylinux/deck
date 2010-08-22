@@ -16,11 +16,11 @@
 <v t="zaril.20100820191018" a="E"><vh>cli syntax + psuedo-logic</vh></v>
 </v>
 <v t="zaril.20100820224228" a="E"><vh>implementation</vh>
-<v t="zaril.20100820230804"><vh>fix useraufs to allow usage by root, limited to certain directories</vh></v>
+<v t="zaril.20100820230804" a="M"><vh>fix useraufs to allow usage by root, limited to certain directories</vh></v>
 <v t="zaril.20100821001344" a="M"><vh>deck a filesystem path</vh></v>
-<v t="zaril.20100821001344.2"><vh>delete a deck</vh></v>
-<v t="zaril.20100822052346" a="TV"><vh>refactor deck storage into a separate class</vh></v>
-<v t="zaril.20100821001344.1"><vh>deck a deck</vh></v>
+<v t="zaril.20100821001344.2" a="M"><vh>delete a deck</vh></v>
+<v t="zaril.20100822052346" a="M"><vh>refactor deck storage into a separate class</vh></v>
+<v t="zaril.20100821001344.1" a="MTV"><vh>deck a deck</vh></v>
 <v t="zaril.20100821001344.3"><vh>get fstab functionality to work</vh></v>
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
 </v>
@@ -260,8 +260,25 @@ create(src, dst)
 </t>
 <t tx="zaril.20100821001344.1">deck /path/to/deck1 deck2
 
-logic
-    exception if deck source is not in the same directory as the desk destination
+create logic in DeckStorage:
+    if source_path is a deck:
+        exception if deck source is not in the same directory as the desk destination
+    
+        copy the root of the source deck
+        for every level:
+            add that level to the new deck and increase its reference count
+        add a new level to the source deck
+        add a new level to the destination deck
+    
+logic in Deck:
+    when we add a level if its mounted then we need to
+    
+handle non-decks
+
+TESTS
+    try decking a deck from another directory
+    try decking an unmounted deck
+    try decking a mounted deck
 </t>
 <t tx="zaril.20100821001344.2">deck -d deck1
 
