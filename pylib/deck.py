@@ -110,6 +110,10 @@ class DeckStorage:
 
         shutil.rmtree(self.struct_path)
 
+        # if .deck isn't handling storage for any more decks, delete it
+        if not os.listdir(self.paths.structs):
+            shutil.rmtree(self.paths.path)
+
     def get_levels(self):
         symlinks = os.listdir(self.struct_path)
         symlinks.sort()
