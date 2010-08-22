@@ -53,7 +53,7 @@ class DeckPaths(Paths):
     def __init__(self, path=None):
         path = join(dirname(realpath(path)), ".deck")
         Paths.__init__(self, path,
-                       ['structs',
+                       ['stacks',
                         'levels',
                         'levels.refs'])
 
@@ -63,7 +63,7 @@ class DeckStorage:
     def __init__(self, deck_path):
         self.name = basename(deck_path.rstrip('/'))
         self.paths = DeckPaths(deck_path)
-        self.struct_path = join(self.paths.structs, self.name)
+        self.stack_path = join(self.paths.stacks, self.name)
 
     def _new_level_id(self):
         """calculates a guaranteed unique new level_id"""
@@ -86,17 +86,17 @@ class DeckStorage:
         makedirs(level_path)
         makedirs(level_ref_path)
 
-        # link the new level into the next position on the deck's struct
-        struct_next_pos = max(map(int, os.listdir(self.struct_path))) + 1
-        os.symlink(make_relative(self.struct_path, level_path),
-                   join(self.struct_path, `struct_next_pos`))
+        # link the new level into the next position on the deck's stack
+        stack_next_pos = max(map(int, os.listdir(self.stack_path))) + 1
+        os.symlink(make_relative(self.stack_path, level_path),
+                   join(self.stack_path, `stack_next_pos`))
         
-        # create reference for new level pointing to this deck's struct
-        os.symlink(make_relative(level_ref_path, self.struct_path),
+        # create reference for new level pointing to this deck's stack
+        os.symlink(make_relative(level_ref_path, self.stack_path),
                    join(level_ref_path, self.name))
 
     def exists(self):
-        return exists(self.struct_path)
+        return exists(self.stack_path)
     
     def create(self, source_path):
         if self.exists():
@@ -111,26 +111,26 @@ class DeckStorage:
                 raise Error("cannot branch a new deck from a deck in another directory")
 
             levels = source.storage.get_levels()
-            makedirs(self.struct_path)
-            os.symlink(levels[0], join(self.struct_path, "0"))
+            makedirs(self.stack_path)
+            os.symlink(levels[0], join(self.stack_path, "0"))
             for level in levels[1:]:
                 level_id = basename(level)
                 self.add_level(level_id)
 
             source.add_level()
         else:
-            makedirs(self.struct_path)
-            os.symlink(realpath(source_path), join(self.struct_path, "0"))
+            makedirs(self.stack_path)
+            os.symlink(realpath(source_path), join(self.stack_path, "0"))
 
         self.add_level()
         
     def delete(self):
-        symlinks = os.listdir(self.struct_path)
+        symlinks = os.listdir(self.stack_path)
         symlinks.sort()
 
         # dereference the linked levels
         for symlink in symlinks[1:]:
-            level_id = basename(os.readlink(join(self.struct_path, symlink)))
+            level_id = basename(os.readlink(join(self.stack_path, symlink)))
             
             level_path = join(self.paths.levels, level_id)
             level_ref_path = join(self.paths.levels_refs, level_id)
@@ -141,21 +141,21 @@ class DeckStorage:
                 os.rmdir(level_ref_path)
                 shutil.rmtree(level_path)
 
-        shutil.rmtree(self.struct_path)
+        shutil.rmtree(self.stack_path)
 
         # if .deck isn't handling storage for any more decks, delete it
-        if not os.listdir(self.paths.structs):
+        if not os.listdir(self.paths.stacks):
             shutil.rmtree(self.paths.path)
 
     def get_levels(self):
-        symlinks = os.listdir(self.struct_path)
+        symlinks = os.listdir(self.stack_path)
         symlinks.sort()
         
         levels = []
         for symlink in symlinks:
-            source = os.readlink(join(self.struct_path, symlink))
+            source = os.readlink(join(self.stack_path, symlink))
             if not source.startswith("/"):
-                source = realpath(join(self.struct_path, source))
+                source = realpath(join(self.stack_path, source))
             levels.append(source)
 
         return levels

@@ -2,7 +2,7 @@
 <leo_file>
 <leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
 <globals body_outline_ratio="0.5">
-	<global_window_position top="0" left="612" height="933" width="658"/>
+	<global_window_position top="10" left="612" height="933" width="658"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
 </globals>
 <preferences/>
@@ -11,7 +11,7 @@
 <v t="zaril.20100820190533" a="E"><vh>Project</vh>
 <v t="zaril.20100820190533.1" a="E"><vh>design</vh>
 <v t="zaril.20100820193236"><vh>brainstorming</vh></v>
-<v t="zaril.20100820223439"><vh>terminology</vh></v>
+<v t="zaril.20100820223439" a="TV"><vh>terminology</vh></v>
 <v t="zaril.20100820192834"><vh>file/data structure</vh></v>
 <v t="zaril.20100820191018" a="E"><vh>cli syntax + psuedo-logic</vh></v>
 </v>
@@ -20,8 +20,8 @@
 <v t="zaril.20100821001344" a="M"><vh>deck a filesystem path</vh></v>
 <v t="zaril.20100821001344.2" a="M"><vh>delete a deck</vh></v>
 <v t="zaril.20100822052346" a="M"><vh>refactor deck storage into a separate class</vh></v>
-<v t="zaril.20100821001344.1" a="MTV"><vh>deck a deck</vh></v>
-<v t="zaril.20100821001344.3"><vh>get fstab functionality to work</vh></v>
+<v t="zaril.20100821001344.1" a="M"><vh>deck a deck</vh></v>
+<v t="zaril.20100821001344.3" a="E"><vh>get fstab functionality to work</vh></v>
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
 </v>
 </v>
@@ -41,7 +41,7 @@ deck -d dst
 	works if dst is mounted or not
 	unmounts dst
 	removes the directory
-	removes the struct
+	removes the stack
 	removes all structures with a ref count of zero
 
 deck -r dst
@@ -62,7 +62,7 @@ example usage:
                 &lt;hash&gt; (generated from &lt;name&gt;-&lt;time&gt;)
                     if it exists, create another one
             
-    struct/
+    stacks/
         &lt;name&gt;/
             0 -&gt; /base
             1 -&gt; ../../levels/&lt;level-id&gt;
@@ -234,6 +234,9 @@ IDEA: rename 0 node the root node?
 <t tx="zaril.20100820223439">deck
     a virtual filesystem branch derived from a directory or another deck
 
+stack
+    a stack of filesystem levels a deck is comprised of
+
 levels
     behind the scenes, decks are a union of multiple filesystem levels
 </t>
@@ -284,11 +287,18 @@ TESTS
 
 logic
     unmount the deck
-    delete struct
+    delete stack
     delete any references
         if references hit zero, delete level
 </t>
-<t tx="zaril.20100821001344.3">will save sub-mounts in fstab and replicate them</t>
+<t tx="zaril.20100821001344.3">will save sub-mounts in fstab and replicate them
+
+logic
+    if deck is close, copy fstab
+    if deck is open, create fstab from /proc/mounts
+
+Q: what is the format of fstab?
+</t>
 <t tx="zaril.20100821001344.4">deck -u deck2
     will update sub-mounts in fstab</t>
 <t tx="zaril.20100822052346">IDEA: we might have multiple storage drivers
