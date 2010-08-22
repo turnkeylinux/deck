@@ -79,12 +79,15 @@ class DeckStorage:
         os.symlink(make_relative(level_ref_path, self.struct_path),
                    join(level_ref_path, self.name))
 
+    def exists(self):
+        return exists(self.struct_path)
+    
     def create(self, source_path):
+        if self.exists():
+            raise Error("deck `%s' already exists" % self.name)
+
         if not isdir(source_path):
             raise Error("source `%s' is not a directory" % source_path)
-
-        if exists(self.struct_path):
-            raise Error("deck `%s' already exists" % self.name)
 
         os.makedirs(self.struct_path)
         os.symlink(realpath(source_path), join(self.struct_path, "0"))
@@ -157,6 +160,8 @@ class Deck:
     def __init__(self, path):
         self.path = path
         self.storage = DeckStorage(path)
+        if not self.storage.exists():
+            raise Error("`%s' not a deck" % path)
         
     def is_mounted(self):
         return aufs.is_mounted(self.path)
