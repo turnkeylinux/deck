@@ -23,7 +23,7 @@ class DeckPaths(Paths):
     def __init__(self, path=None):
         path = join(dirname(realpath(path)), ".deck")
         Paths.__init__(self, path,
-                       ['struct',
+                       ['structs',
                         'levels',
                         'levels.refs'])
 
@@ -55,7 +55,7 @@ class DeckStorage:
     def __init__(self, deck_path):
         self.name = basename(deck_path.rstrip('/'))
         self.paths = DeckPaths(deck_path)
-        self.struct_path = join(self.paths.struct, self.name)
+        self.struct_path = join(self.paths.structs, self.name)
 
     def _new_level_id(self):
         """calculates a guaranteed unique new level_id"""
