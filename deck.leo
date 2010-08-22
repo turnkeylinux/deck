@@ -17,9 +17,9 @@
 </v>
 <v t="zaril.20100820224228" a="E"><vh>implementation</vh>
 <v t="zaril.20100820230804"><vh>fix useraufs to allow usage by root, limited to certain directories</vh></v>
-<v t="zaril.20100821001344" a="ETV"><vh>deck a filesystem path</vh></v>
+<v t="zaril.20100821001344" a="M"><vh>deck a filesystem path</vh></v>
 <v t="zaril.20100821001344.1"><vh>deck a deck</vh></v>
-<v t="zaril.20100821001344.2"><vh>delete a deck</vh></v>
+<v t="zaril.20100821001344.2" a="TV"><vh>delete a deck</vh></v>
 <v t="zaril.20100821001344.3"><vh>get fstab functionality to work</vh></v>
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
 </v>
@@ -57,7 +57,6 @@ example usage:
     
     levels
         &lt;level-id&gt;/
-
             &lt;level-id&gt; :=
                 &lt;hash&gt; (generated from &lt;name&gt;-&lt;time&gt;)
                     if it exists, create another one
@@ -167,6 +166,68 @@ A:
     if the original deck is mounted, 
         remount the last level as readonly
         insert the last overlay as writeable
+---
+GOTCHA: cross directory decking introduces multiple problems
+    potential namespace conflicts
+        same deck name in two different directories
+            breaks assumptions of file structure
+
+    if linked decks move, this could break the deck
+        absolute level links would no longer be correct
+
+    increases complexity significantly
+
+IDEAS:
+    redesign internals for storage in one big deck (global $HOME/.deck)
+
+    disallow cross-directory decking
+
+    support `decking' by cloning the origin deck into local deck?
+        I.e., with rsync
+            clone hardlinks if possible
+
+do we really need to allow cross-project decking?
+    what is the use?
+    this design makes the derivatives more visible
+
+Q: what would the file format for a global design look like?
+A:
+    
+.deck/
+    levels.refs/
+        &lt;level-id&gt;/
+            &lt;hash-of-filepath&gt; -&gt; ../decks/&lt;hash-of-filepath&gt;
+    
+    levels/
+        &lt;level-id&gt;/
+            &lt;level-id&gt; := &lt;hash&gt; 
+                generated from &lt;name&gt;-&lt;time&gt;
+                if it exists, create another one
+            
+    decks/
+        &lt;hash-of-filepath&gt;/
+            0 -&gt; /base
+            1 -&gt; ../../levels/&lt;level-id&gt;
+            2 -&gt; ...
+
+            fstab
+    
+alternative?
+        file/path/
+            0 -&gt;
+            1 -&gt; 
+            2 -&gt; 
+
+cons:
+    more opaque file structure
+    that a deck is a deck is not clear (no .deck directory)
+    immobile decks
+    different users would have different global storage
+        e.g., root couldn't deck a user's filesystem
+
+---
+IDEA: rename 0 node the root node?
+    differentiate between levels and the root filesystem...
 
     </t>
 <t tx="zaril.20100820223439">deck
@@ -196,8 +257,18 @@ create(src, dst)
     create the deck structure
     create the reference
 </t>
-<t tx="zaril.20100821001344.1">deck /path/to/deck1 deck2</t>
-<t tx="zaril.20100821001344.2">deck -d deck1</t>
+<t tx="zaril.20100821001344.1">deck /path/to/deck1 deck2
+
+GOTCHA: enabling the decking of a deck from another directory is tricky
+</t>
+<t tx="zaril.20100821001344.2">deck -d deck1
+
+logic
+    unmount the deck
+    delete struct
+    delete any references
+        if references hit zero, delete level
+</t>
 <t tx="zaril.20100821001344.3">will save sub-mounts in fstab and replicate them</t>
 <t tx="zaril.20100821001344.4">deck -u deck2
     will update sub-mounts in fstab</t>
