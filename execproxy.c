@@ -73,8 +73,8 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 		
-		clean_environ();
 	}
+	clean_environ();
 
 	execv("/usr/bin/python", argv_copy);
 	perror("execv");
