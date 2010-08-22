@@ -18,8 +18,9 @@
 <v t="zaril.20100820224228" a="E"><vh>implementation</vh>
 <v t="zaril.20100820230804"><vh>fix useraufs to allow usage by root, limited to certain directories</vh></v>
 <v t="zaril.20100821001344" a="M"><vh>deck a filesystem path</vh></v>
+<v t="zaril.20100821001344.2"><vh>delete a deck</vh></v>
+<v t="zaril.20100822052346" a="TV"><vh>refactor deck storage into a separate class</vh></v>
 <v t="zaril.20100821001344.1"><vh>deck a deck</vh></v>
-<v t="zaril.20100821001344.2" a="TV"><vh>delete a deck</vh></v>
 <v t="zaril.20100821001344.3"><vh>get fstab functionality to work</vh></v>
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
 </v>
@@ -61,7 +62,7 @@ example usage:
                 &lt;hash&gt; (generated from &lt;name&gt;-&lt;time&gt;)
                     if it exists, create another one
             
-    decks/
+    struct/
         &lt;name&gt;/
             0 -&gt; /base
             1 -&gt; ../../levels/&lt;level-id&gt;
@@ -259,7 +260,8 @@ create(src, dst)
 </t>
 <t tx="zaril.20100821001344.1">deck /path/to/deck1 deck2
 
-GOTCHA: enabling the decking of a deck from another directory is tricky
+logic
+    exception if deck source is not in the same directory as the desk destination
 </t>
 <t tx="zaril.20100821001344.2">deck -d deck1
 
@@ -272,5 +274,16 @@ logic
 <t tx="zaril.20100821001344.3">will save sub-mounts in fstab and replicate them</t>
 <t tx="zaril.20100821001344.4">deck -u deck2
     will update sub-mounts in fstab</t>
+<t tx="zaril.20100822052346">IDEA: we might have multiple storage drivers
+
+Deck is the front-end class
+Q: what is the name of the back-end class?
+
+DeckEngine
+DeckInternals
+DeckBackEnd
+DeckDriver
+DeckStorage (*)
+</t>
 </tnodes>
 </leo_file>

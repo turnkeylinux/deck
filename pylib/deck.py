@@ -49,95 +49,72 @@ def make_relative(root, path):
         root = dirname(root).rstrip('/')
         up_count += 1
 
-class Deck:
-    @staticmethod
-    def new_level_id(levels_path, name):
+class DeckStorage:
+    """This class takes care of a deck's representation on the filesystem."""
+    
+    def __init__(self, deck_path):
+        self.name = basename(deck_path.rstrip('/'))
+        self.paths = DeckPaths(deck_path)
+        self.struct_path = join(self.paths.struct, self.name)
+
+    def _new_level_id(self):
         """calculates a guaranteed unique new level_id"""
         def digest(s):
             return md5.md5(s).hexdigest()
         
-        level_id = digest(name + `time.time()`)
-        while exists(join(levels_path, level_id)):
+        level_id = digest(self.name + `time.time()`)
+        while exists(join(self.paths.levels, level_id)):
             level_id = digest(level_id)
 
         return level_id
-    
-    @classmethod
-    def init_create(cls, source_path, deck_path):
-        if not isdir(source_path):
-            raise Error("source `%s' is not a directory" % source_path)
 
-        if exists(deck_path) and \
-               (not isdir(deck_path) or len(os.listdir(deck_path)) != 0):
-            raise Error("`%s' exists and is not an empty directory" % deck_path)
-
-        if is_deck(deck_path):
-            raise Error("`%s' deck already created" % deck_path)
-
-        deck_name = basename(deck_path.rstrip("/"))
-        paths = DeckPaths(deck_path)
+    def add_level(self):
+        level_id = self._new_level_id()
         
-        level_id = cls.new_level_id(paths.levels, deck_name)
-        level_id_path = join(paths.levels, level_id)
-        level_id_ref_path = join(paths.levels_refs, level_id)
+        level_path = join(self.paths.levels, level_id)
+        level_ref_path = join(self.paths.levels_refs, level_id)
 
-        deck_struct_path = join(paths.struct, deck_name)
+        os.makedirs(level_path)
+        os.makedirs(level_ref_path)
 
-        os.makedirs(level_id_path)
-        os.makedirs(level_id_ref_path)
-        os.makedirs(deck_struct_path)
+        # link the new level into the next position on the deck's struct
+        struct_next_pos = max(map(int, os.listdir(self.struct_path))) + 1
+        os.symlink(make_relative(self.struct_path, level_path),
+                   join(self.struct_path, `struct_next_pos`))
+        
+        # create reference for new level pointing to this deck's struct
+        os.symlink(make_relative(level_ref_path, self.struct_path),
+                   join(level_ref_path, self.name))
 
-        symlinks = [ realpath(source_path), make_relative(deck_struct_path, level_id_path) ]
-        for i in range(len(symlinks)):
-            os.symlink(symlinks[i], join(deck_struct_path, `i`))
+    def create(self, source_path):
+        if exists(self.struct_path):
+            raise Error("deck `%s' already exists" % self.name)
 
-        # increase reference count of level_id
-        os.symlink(make_relative(level_id_ref_path, deck_struct_path),
-                   join(level_id_ref_path, deck_name))
+        os.makedirs(self.struct_path)
+        os.symlink(realpath(source_path), join(self.struct_path, "0"))
 
-        os.makedirs(deck_path)
-        deck = cls(deck_path)
-        deck.mount()
-        return deck
-
-    @classmethod
-    def delete(cls, deck_path):
-        deck = cls(deck_path)
-        if deck.is_mounted():
-            deck.umount()
-        os.rmdir(deck_path)
-
-        symlinks = os.listdir(deck.struct_path)
+        self.add_level()
+        
+    def delete(self):
+        symlinks = os.listdir(self.struct_path)
         symlinks.sort()
 
+        # dereference the linked levels
         for symlink in symlinks[1:]:
-            level_id = basename(os.readlink(join(deck.struct_path, symlink)))
-            level_path = join(deck.paths.levels, level_id)
-            level_ref_path = join(deck.paths.levels_refs, level_id)
+            level_id = basename(os.readlink(join(self.struct_path, symlink)))
+            
+            level_path = join(self.paths.levels, level_id)
+            level_ref_path = join(self.paths.levels_refs, level_id)
 
-            os.remove(join(level_ref_path, deck.name))
+            # purge levels that have no more references
+            os.remove(join(level_ref_path, self.name))
             if len(os.listdir(level_ref_path)) == 0:
                 os.rmdir(level_ref_path)
                 shutil.rmtree(level_path)
 
-        shutil.rmtree(deck.struct_path)
-        
-    def __init__(self, path):
-        self.path = path
-        self.paths = DeckPaths(path)
-        self.name = basename(path.rstrip("/"))
-        self.struct_path = join(self.paths.struct, self.name)
-        
-        if not isdir(self.struct_path):
-            raise Error("not a deck `%s'" % path)
+        shutil.rmtree(self.struct_path)
 
-    def is_mounted(self):
-        return aufs.is_mounted(self.path)
-
-    def mount(self):
-        if self.is_mounted():
-            raise Error("`%s' already mounted" % self.path)
-
+    def get_levels(self):
         symlinks = os.listdir(self.struct_path)
         symlinks.sort()
         
@@ -148,9 +125,53 @@ class Deck:
                 source = realpath(join(self.struct_path, source))
             levels.append(source)
 
+        return levels
+
+class Deck:
+    """This class is the front-end of a deck"""
+    @classmethod
+    def init_create(cls, source_path, deck_path):
+        if not isdir(source_path):
+            raise Error("source `%s' is not a directory" % source_path)
+
+        if exists(deck_path) and \
+               (not isdir(deck_path) or len(os.listdir(deck_path)) != 0):
+            raise Error("`%s' exists and is not an empty directory" % deck_path)
+
+        storage = DeckStorage(deck_path)
+        storage.create(source_path)
+
+        os.makedirs(deck_path)
+        deck = cls(deck_path)
+        deck.mount()
+
+        return deck
+
+    @classmethod
+    def delete(cls, deck_path):
+        deck = cls(deck_path)
+        if deck.is_mounted():
+            deck.umount()
+        os.rmdir(deck_path)
+
+        storage = DeckStorage(deck_path)
+        storage.delete()
+        
+    def __init__(self, path):
+        self.path = path
+        self.storage = DeckStorage(path)
+        
+    def is_mounted(self):
+        return aufs.is_mounted(self.path)
+
+    def mount(self):
+        if self.is_mounted():
+            raise Error("`%s' already mounted" % self.path)
+
+        levels = self.storage.get_levels()
         levels.reverse()
         aufs.mount(levels, self.path)
-
+        
     def umount(self):
         if not self.is_mounted():
             raise Error("`%s' not mounted" % self.path)
