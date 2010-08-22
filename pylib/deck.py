@@ -12,13 +12,6 @@ import aufs
 class Error(Exception):
     pass
 
-def is_deck(path):
-    try:
-        Deck(path)
-        return True
-    except Error:
-        return False
-
 class DeckPaths(Paths):
     def __init__(self, path=None):
         path = join(dirname(realpath(path)), ".deck")
