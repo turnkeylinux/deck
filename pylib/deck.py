@@ -9,17 +9,6 @@ from paths import Paths
 
 import aufs
 
-class Error(Exception):
-    pass
-
-class DeckPaths(Paths):
-    def __init__(self, path=None):
-        path = join(dirname(realpath(path)), ".deck")
-        Paths.__init__(self, path,
-                       ['structs',
-                        'levels',
-                        'levels.refs'])
-
 def make_relative(root, path):
     """Return <path> relative to <root>.
 
@@ -41,6 +30,17 @@ def make_relative(root, path):
 
         root = dirname(root).rstrip('/')
         up_count += 1
+
+class Error(Exception):
+    pass
+
+class DeckPaths(Paths):
+    def __init__(self, path=None):
+        path = join(dirname(realpath(path)), ".deck")
+        Paths.__init__(self, path,
+                       ['structs',
+                        'levels',
+                        'levels.refs'])
 
 class DeckStorage:
     """This class takes care of a deck's representation on the filesystem."""
