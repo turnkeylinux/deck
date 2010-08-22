@@ -105,13 +105,13 @@ class DeckStorage:
         if not isdir(source_path):
             raise Error("source `%s' is not a directory" % source_path)
 
-        makedirs(self.struct_path)
         if is_deck(source_path):
             source = Deck(source_path)
             if source.storage.paths.path != self.paths.path:
                 raise Error("cannot branch a new deck from a deck in another directory")
 
             levels = source.storage.get_levels()
+            makedirs(self.struct_path)
             os.symlink(levels[0], join(self.struct_path, "0"))
             for level in levels[1:]:
                 level_id = basename(level)
@@ -119,6 +119,7 @@ class DeckStorage:
 
             source.add_level()
         else:
+            makedirs(self.struct_path)
             os.symlink(realpath(source_path), join(self.struct_path, "0"))
 
         self.add_level()
