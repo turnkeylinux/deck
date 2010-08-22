@@ -87,6 +87,9 @@ class DeckStorage:
                    join(level_ref_path, self.name))
 
     def create(self, source_path):
+        if not isdir(source_path):
+            raise Error("source `%s' is not a directory" % source_path)
+
         if exists(self.struct_path):
             raise Error("deck `%s' already exists" % self.name)
 
@@ -131,9 +134,6 @@ class Deck:
     """This class is the front-end of a deck"""
     @classmethod
     def init_create(cls, source_path, deck_path):
-        if not isdir(source_path):
-            raise Error("source `%s' is not a directory" % source_path)
-
         if exists(deck_path) and \
                (not isdir(deck_path) or len(os.listdir(deck_path)) != 0):
             raise Error("`%s' exists and is not an empty directory" % deck_path)
