@@ -2,7 +2,7 @@
 <leo_file>
 <leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
 <globals body_outline_ratio="0.5">
-	<global_window_position top="10" left="612" height="933" width="658"/>
+	<global_window_position top="0" left="612" height="933" width="658"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
 </globals>
 <preferences/>
@@ -11,7 +11,7 @@
 <v t="zaril.20100820190533" a="E"><vh>Project</vh>
 <v t="zaril.20100820190533.1" a="E"><vh>design</vh>
 <v t="zaril.20100820193236"><vh>brainstorming</vh></v>
-<v t="zaril.20100820223439" a="TV"><vh>terminology</vh></v>
+<v t="zaril.20100820223439"><vh>terminology</vh></v>
 <v t="zaril.20100820192834"><vh>file/data structure</vh></v>
 <v t="zaril.20100820191018" a="E"><vh>cli syntax + psuedo-logic</vh></v>
 </v>
@@ -21,7 +21,10 @@
 <v t="zaril.20100821001344.2" a="M"><vh>delete a deck</vh></v>
 <v t="zaril.20100822052346" a="M"><vh>refactor deck storage into a separate class</vh></v>
 <v t="zaril.20100821001344.1" a="M"><vh>deck a deck</vh></v>
-<v t="zaril.20100821001344.3" a="E"><vh>get fstab functionality to work</vh></v>
+<v t="zaril.20100821001344.3" a="ETV"><vh>get fstab functionality to work</vh>
+<v t="zaril.20100823052232"><vh>gotcha: binds don't show up as binds in /proc/mounts</vh></v>
+<v t="zaril.20100822094316"><vh>security gotcha: mounting requires CAP_SYS_ADMIN privileges</vh></v>
+</v>
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
 </v>
 </v>
@@ -67,13 +70,14 @@ example usage:
             0 -&gt; /base
             1 -&gt; ../../levels/&lt;level-id&gt;
             2 -&gt; ...
-
-            fstab
     
         &lt;name-derivative&gt;/
             0 -&gt; /base
             1 -&gt; ../../levels/&lt;level-id&gt;
             2 -&gt; ...
+
+    fstabs/
+        &lt;name&gt;
 </t>
 <t tx="zaril.20100820193236">Q: how do I name this project?
 
@@ -293,11 +297,40 @@ logic
 </t>
 <t tx="zaril.20100821001344.3">will save sub-mounts in fstab and replicate them
 
+design
+    mounts object 
+        init can read from file and adjust/filter only mounts matching a path
+        can write internal state to file
+        can apply mounts to another directory  
+
 logic
     if deck is close, copy fstab
     if deck is open, create fstab from /proc/mounts
+        create a list of submounts of source_path
+        turn absolute paths into relative paths
+
+test
+    read mounts from one directory, apply to another
+
+ROADMAP
+    create should record fstab
+    mount should apply fstab
 
 Q: what is the format of fstab?
+A:
+&lt;device | filesystem&gt;    &lt;mountpoint&gt;    &lt;type&gt;  &lt;opts&gt;
+---
+Q: does /proc/mounts follow fstab format?s
+A: yes
+---
+GOTCHA: binds don't show up as binds in /proc/mounts
+    SOLUTION: they show up on /etc/mtab
+---
+GOTCHA: umount failing to umount binds
+    SOLUTION: umount in reverse, that way we umount sub-binds (/turnkey/repository) before the parent bind (/turnkey)
+
+
+
 </t>
 <t tx="zaril.20100821001344.4">deck -u deck2
     will update sub-mounts in fstab</t>
@@ -311,6 +344,32 @@ DeckInternals
 DeckBackEnd
 DeckDriver
 DeckStorage (*)
+</t>
+<t tx="zaril.20100822094316">we can only apply mounts if we're root AND if we have CAP_SYS_ADMIN privileges
+
+IDEAS:
+disable fstab options for regular users
+we could give these privileges specially to deck 
+can we rely on useraufs to limit root?
+    we can't because root might trick us into running another useraufs program
+        via PATH for example
+        and then we would mount --bind arbitrary filesystems arbitrary places
+disable decking from /?
+maybe another special wrapper?
+maybe a configuration file like useraufs?
+    limit which sources we can deck
+
+SOLUTION:
+rely on useraufs to decide whether root is allowed or not to deck a certain dir
+if useraufs fails, we raise an exception and don't do any dangerous mounting
+to prevent deck from being spoofed into running another useraufs program
+    hack execproxy to clean_environ() regardless of suid status
+        because we are being given special privileges in the MAC policy</t>
+<t tx="zaril.20100823052232">E: mount --bind foo bar
+    Q: does /proc/mounts contain enough info to reconstruct bind?
+    A: no
+
+DISCOVERY: /etc/mtab does contain enough info
 </t>
 </tnodes>
 </leo_file>

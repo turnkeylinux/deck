@@ -1,8 +1,18 @@
 import re
+import sys
+import subprocess
+
+class Error(Exception):
+    pass
 
 def is_mounted(dir):
     return Mounts("/proc/mounts").exists(dir)
-    
+
+def system(*args):
+    error = subprocess.call(args)
+    if error:
+        raise Error("nonzero exitcode %d from command `%s'" % (error, " ".join(args)))
+
 class Mount:
     def __init__(self, device, dir, type, opts):
         self.device = device
@@ -11,21 +21,27 @@ class Mount:
         self.opts = opts
         
     def mount(self, root):
+        if self.is_mounted(root):
+            return False
+        
         if root:
             realdir = root + self.dir
         else:
             realdir = self.dir
 
-        command = "mount -t %s -o %s %s %s" % (self.type, self.opts, self.device, realdir)
-        print command
+        system("mount", "-t", self.type, "-o", self.opts, self.device, realdir)
+        return True
 
     def umount(self, root):
+        if not self.is_mounted(root):
+            return False
+        
         if root:
             realdir = root + self.dir
         else:
             realdir = self.dir
-        command = "umount %s" % realdir
-        print command
+        system("umount", realdir)
+        return True
 
     def is_mounted(self, root):
         if root:
@@ -40,7 +56,11 @@ class Mounts:
         if 'root' is specified, filter mounts to submounts under the root"""
 
         self.mounts = []
-        for line in file(fstab).readlines():
+        try:
+            fh = file(fstab)
+        except IOError, e:
+            raise Error(e)
+        for line in fh.readlines():
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
@@ -61,10 +81,15 @@ class Mounts:
             mount = Mount(device, dir, type, opts)
             self.mounts.append(mount)
 
+        self.root = root
+
+    def __str__(self):
+        return "\n".join([ " ".join([mount.device, mount.dir, mount.type, mount.opts]) \
+                           for mount in self.mounts ])
+    
     def save(self, path):
         fh = file(path, "w")
-        for mount in self.mounts:
-            print >> fh, " ".join([mount.device, mount.dir, mount.type, mount.opts])
+        print >> fh, str(self)
         fh.close()
 
     def exists(self, dir):
@@ -73,11 +98,17 @@ class Mounts:
             if mount.dir.rstrip("/") == dir.rstrip("/"):
                 return True
         return False
-    
+
     def mount(self, root=None):
+        if root is None:
+            root = self.root
+            
         for mount in self.mounts:
             mount.mount(root)
 
     def umount(self, root=None):
-        for mount in self.mounts:
+        if root is None:
+            root = self.root
+
+        for mount in reversed(self.mounts):
             mount.umount(root)
