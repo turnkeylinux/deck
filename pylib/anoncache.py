@@ -29,7 +29,7 @@ class AnonCache:
         def digest(s):
             return md5.md5(s).hexdigest()
 
-        id = digest(`seed` + `random.SystemRandom().getrandbits(64)`)
+        id = digest(`seed` + `time.time()` + `random.SystemRandom().getrandbits(128)`)
         while self.exists(id):
             id = digest(id)
 
