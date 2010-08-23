@@ -1,6 +1,10 @@
+import os
 import re
 import sys
 import subprocess
+import types
+
+from StringIO import StringIO
 
 class Error(Exception):
     pass
@@ -52,14 +56,24 @@ class Mount:
 
 class Mounts:
     def __init__(self, fstab, root=None):
-        """Initialize mounts from fstab.
-        if 'root' is specified, filter mounts to submounts under the root"""
+        """Initialize mounts from <fstab>, which can be a file path, a file handle,
+        or a string containing fstab-like values.
+        
+        if <root> is specified, filter mounts to submounts under the root"""
 
         self.mounts = []
-        try:
-            fh = file(fstab)
-        except IOError, e:
-            raise Error(e)
+        if isinstance(fstab, file):
+            fh = fstab
+        else:
+            fstab = str(fstab)
+            if os.path.exists(fstab):
+                try:
+                    fh = file(fstab)
+                except IOError, e:
+                    raise Error(e)
+            else:
+                fh = StringIO(fstab)
+        
         for line in fh.readlines():
             line = line.strip()
             if not line or line.startswith("#"):
