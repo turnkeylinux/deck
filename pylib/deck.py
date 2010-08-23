@@ -231,9 +231,8 @@ class Deck:
         if not self.is_mounted():
             raise Error("`%s' not mounted" % self.path)
 
-        self.refresh_fstab()
-        
         if os.geteuid() == 0 and self.storage.mounts:
+            self.refresh_fstab()
             Mounts(deckcache.blob(self.storage.mounts)).umount(self.path)
             
         aufs.umount(self.path)
@@ -241,6 +240,9 @@ class Deck:
     def refresh_fstab(self):
         if not self.is_mounted():
             raise Error("can't refresh fstab - `%s' not mounted" % self.path)
+
+        if os.geteuid() != 0:
+            raise Error("no fstab to refresh - auto-mounting disabled for non-root users")
 
         fstab = str(Mounts("/etc/mtab", self.path))
         print >> deckcache.blob(self.storage.mounts, "w"), fstab
