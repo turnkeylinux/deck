@@ -1,4 +1,5 @@
-import os
+from os.path import *
+
 import re
 import sys
 import subprocess
@@ -10,7 +11,7 @@ class Error(Exception):
     pass
 
 def is_mounted(dir):
-    return Mounts("/proc/mounts").exists(os.path.realpath(dir))
+    return Mounts("/proc/mounts").exists(realpath(dir))
 
 def system(*args):
     error = subprocess.call(args)
@@ -66,7 +67,7 @@ class Mounts:
             fh = fstab
         else:
             fstab = str(fstab)
-            if os.path.exists(fstab):
+            if exists(fstab):
                 try:
                     fh = file(fstab)
                 except IOError, e:
@@ -75,7 +76,7 @@ class Mounts:
                 fh = StringIO(fstab)
 
         if root:
-            root = os.path.realpath(root)
+            root = realpath(root)
         
         for line in fh.readlines():
             line = line.strip()
@@ -91,7 +92,7 @@ class Mounts:
                 dir = "/" + dir
                 
             if root:
-                dir = os.path.realpath(dir)
+                dir = realpath(dir)
                 # skip mounts that arne't subdirectories of root
                 if dir == root or not dir.startswith(root + "/"):
                     continue
