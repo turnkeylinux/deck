@@ -187,7 +187,7 @@ class Deck:
         elif storage.mounts:
             # make an identical copy of the blob
             newid = deckcache.new_id()
-            deckcache.blob(newid, "w").write(deckcache.blob(storage.mounts).read())
+            print >> deckcache.blob(newid, "w"), deckcache.blob(storage.mounts).read()
             storage.mounts = newid
 
         deck = cls(deck_path)
@@ -235,6 +235,13 @@ class Deck:
             
         aufs.umount(self.path)
 
+    def refresh_fstab(self):
+        if not self.is_mounted():
+            raise Error("can't refresh fstab - `%s' not mounted" % self.path)
+
+        fstab = str(Mounts("/etc/mtab", realpath(self.path)))
+        print >> deckcache.blob(self.storage.mounts, "w"), fstab
+
     def add_level(self):
         self.storage.add_level()
         if self.is_mounted():
@@ -253,7 +260,7 @@ def umount(deck_path):
     Deck(deck_path).umount()
 
 def refresh_fstab(deck_path):
-    print "refresh_fstab(%s)" % deck_path
+    Deck(deck_path).refresh_fstab()
 
 def delete(deck_path):
     Deck.delete(deck_path)
