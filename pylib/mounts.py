@@ -73,6 +73,9 @@ class Mounts:
                     raise Error(e)
             else:
                 fh = StringIO(fstab)
+
+        if root:
+            root = os.path.realpath(root)
         
         for line in fh.readlines():
             line = line.strip()
@@ -88,6 +91,7 @@ class Mounts:
                 dir = "/" + dir
                 
             if root:
+                dir = os.path.realpath(dir)
                 # skip mounts that arne't subdirectories of root
                 if dir == root or not dir.startswith(root + "/"):
                     continue
