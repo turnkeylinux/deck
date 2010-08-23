@@ -1,3 +1,4 @@
+import os
 import time
 import md5
 import random
@@ -50,4 +51,8 @@ class AnonCache:
             return file(blob_path, **kws)
         except IOError, e:
             raise Error(e)
+
+    def delete(self, id):
+        os.remove(self._get_blob_path(id))
+        
 

@@ -147,7 +147,8 @@ class DeckStorage(object):
                 shutil.rmtree(level_path)
 
         shutil.rmtree(self.stack_path)
-
+        self.mounts = None
+        
         # if .deck isn't handling storage for any more decks, delete it
         if not os.listdir(self.paths.stacks):
             shutil.rmtree(self.paths.path)
@@ -183,6 +184,11 @@ class Deck:
             deckcache.blob(id, "w").write(str(mounts))
             
             storage.mounts = id
+        elif storage.mounts:
+            # make an identical copy of the blob
+            newid = deckcache.new_id()
+            deckcache.blob(newid, "w").write(deckcache.blob(storage.mounts).read())
+            storage.mounts = newid
 
         deck = cls(deck_path)
         deck.mount()
@@ -197,6 +203,8 @@ class Deck:
         os.rmdir(deck_path)
 
         storage = DeckStorage(deck_path)
+        if storage.mounts:
+            deckcache.delete(storage.mounts)
         storage.delete()
         
     def __init__(self, path):
