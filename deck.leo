@@ -21,7 +21,7 @@
 <v t="zaril.20100821001344.2" a="M"><vh>delete a deck</vh></v>
 <v t="zaril.20100822052346" a="M"><vh>refactor deck storage into a separate class</vh></v>
 <v t="zaril.20100821001344.1" a="M"><vh>deck a deck</vh></v>
-<v t="zaril.20100821001344.3"><vh>get fstab functionality to work</vh>
+<v t="zaril.20100821001344.3" a="E"><vh>get fstab functionality to work</vh>
 <v t="zaril.20100823052232"><vh>gotcha: binds don't show up as binds in /proc/mounts</vh></v>
 <v t="zaril.20100822094316"><vh>security gotcha: mounting requires CAP_SYS_ADMIN privileges</vh></v>
 <v t="zaril.20100823064145"><vh>security gotcha: root could edit fstab and "trick" deck into arbitrary mounts</vh></v>
@@ -58,7 +58,7 @@ example usage:
 <t tx="zaril.20100820192834">.deck/
     levels.refs/
         &lt;level-id&gt;/
-            &lt;name&gt; -&gt; ../decks/&lt;name&gt;
+            &lt;name&gt; -&gt; ../stacks/&lt;name&gt;
     
     levels
         &lt;level-id&gt;/
