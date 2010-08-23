@@ -12,7 +12,7 @@
 <v t="zaril.20100820190533.1" a="E"><vh>design</vh>
 <v t="zaril.20100820193236"><vh>brainstorming</vh></v>
 <v t="zaril.20100820223439"><vh>terminology</vh></v>
-<v t="zaril.20100820192834"><vh>file/data structure</vh></v>
+<v t="zaril.20100820192834" a="TV"><vh>file/data structure</vh></v>
 <v t="zaril.20100820191018" a="E"><vh>cli syntax + psuedo-logic</vh></v>
 </v>
 <v t="zaril.20100820224228" a="E"><vh>implementation</vh>
@@ -26,7 +26,7 @@
 <v t="zaril.20100822094316"><vh>security gotcha: mounting requires CAP_SYS_ADMIN privileges</vh></v>
 <v t="zaril.20100823064145"><vh>security gotcha: root could edit fstab and "trick" deck into arbitrary mounts</vh></v>
 </v>
-<v t="zaril.20100821001344.4" a="TV"><vh>update deck fstab</vh></v>
+<v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
 </v>
 </v>
 </vnodes>
@@ -77,7 +77,7 @@ example usage:
             1 -&gt; ../../levels/&lt;level-id&gt;
             2 -&gt; ...
 
-    fstabs/
+    mounts/
         &lt;name&gt;
 </t>
 <t tx="zaril.20100820193236">Q: how do I name this project?
