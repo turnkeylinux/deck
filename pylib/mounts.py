@@ -84,6 +84,9 @@ class Mounts:
                 continue
 
             device, dir, type, opts = vals[:4]
+            if not dir.startswith("/"):
+                dir = "/" + dir
+                
             if root:
                 # skip mounts that arne't subdirectories of root
                 if dir == root or not dir.startswith(root + "/"):
