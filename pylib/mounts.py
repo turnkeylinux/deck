@@ -10,7 +10,7 @@ class Error(Exception):
     pass
 
 def is_mounted(dir):
-    return Mounts("/proc/mounts").exists(dir)
+    return Mounts("/proc/mounts").exists(os.path.realpath(dir))
 
 def system(*args):
     error = subprocess.call(args)
@@ -100,6 +100,9 @@ class Mounts:
 
         self.root = root
 
+    def __len__(self):
+        return len(self.mounts)
+    
     def __str__(self):
         return "\n".join([ " ".join([mount.device, mount.dir, mount.type, mount.opts]) \
                            for mount in self.mounts ])

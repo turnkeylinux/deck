@@ -2,7 +2,7 @@
 <leo_file>
 <leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
 <globals body_outline_ratio="0.5">
-	<global_window_position top="0" left="612" height="933" width="658"/>
+	<global_window_position top="0" left="472" height="933" width="798"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
 </globals>
 <preferences/>
@@ -24,6 +24,7 @@
 <v t="zaril.20100821001344.3" a="ETV"><vh>get fstab functionality to work</vh>
 <v t="zaril.20100823052232"><vh>gotcha: binds don't show up as binds in /proc/mounts</vh></v>
 <v t="zaril.20100822094316"><vh>security gotcha: mounting requires CAP_SYS_ADMIN privileges</vh></v>
+<v t="zaril.20100823064145"><vh>security gotcha: root could edit fstab and "trick" deck into arbitrary mounts</vh></v>
 </v>
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
 </v>
@@ -303,18 +304,17 @@ design
         can write internal state to file
         can apply mounts to another directory  
 
-logic
-    if deck is close, copy fstab
-    if deck is open, create fstab from /proc/mounts
-        create a list of submounts of source_path
-        turn absolute paths into relative paths
+create logic
+    if source is a deck, copy it's mount as the initial value
+    if the source_path has submounts, create a new fstab
 
-test
-    read mounts from one directory, apply to another
 
-ROADMAP
-    create should record fstab
-    mount should apply fstab
+MILESTONES
+    I deck a chrooted directory, it creates an fstab for chroot and mounts it on the deck
+    onl y if we're root
+    delete the mounts
+
+
 
 Q: what is the format of fstab?
 A:
@@ -328,7 +328,6 @@ GOTCHA: binds don't show up as binds in /proc/mounts
 ---
 GOTCHA: umount failing to umount binds
     SOLUTION: umount in reverse, that way we umount sub-binds (/turnkey/repository) before the parent bind (/turnkey)
-
 
 
 </t>
@@ -370,6 +369,28 @@ to prevent deck from being spoofed into running another useraufs program
     A: no
 
 DISCOVERY: /etc/mtab does contain enough info
+</t>
+<t tx="zaril.20100823064145">IDEAS
+    prevent anything other than root from accessing the chroot's deck
+    we'd have to prevent access to ANY directory in which we allow chroots
+    make deck sign the fstab? (hide the key)
+    store fstab in a different global storage
+        we only need to support root anyhow
+        then you only give deck permissions to access that directory
+
+SOLUTION:
+    develop a key based storage repository
+        objects accessed and written by a random key-id
+
+    instead of storing the fstab content in the deck, we store the key
+    interface identical to file()
+        only instead of a filepath, you have a key
+
+
+    what do we call it?
+        anonfile
+
+        
 </t>
 </tnodes>
 </leo_file>

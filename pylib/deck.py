@@ -9,8 +9,14 @@ import shutil
 from paths import Paths
 
 import aufs
+import mounts
+import anoncache
+
+from mounts import Mounts
 
 from utils import makedirs, make_relative
+
+deckcache = anoncache.AnonCache("/etc/deck/mounts")
 
 class Error(Exception):
     pass
@@ -26,12 +32,36 @@ class DeckPaths(Paths):
     def __init__(self, path=None):
         path = join(dirname(realpath(path)), ".deck")
         Paths.__init__(self, path,
-                       ['stacks',
+                       ['mounts',
+                        'stacks',
                         'levels',
                         'levels.refs'])
 
-class DeckStorage:
+class DeckStorage(object):
     """This class takes care of a deck's representation on the filesystem."""
+    class Mounts(object):
+        def __get__(self, obj, type):
+            if obj is None:
+                return None
+
+            path = join(obj.paths.mounts, obj.name)
+            try:
+                return file(path).read().rstrip()
+            except:
+                return None
+            
+        def __set__(self, obj, val):
+            if not exists(obj.paths.mounts):
+                makedirs(obj.paths.mounts)
+
+            path = join(obj.paths.mounts, obj.name)
+            if val is None:
+                if exists(path):
+                    os.remove(path)
+            else:
+                file(path, "w").write(val + "\n")
+
+    mounts = Mounts()
     
     def __init__(self, deck_path):
         self.name = basename(deck_path.rstrip('/'))
@@ -91,6 +121,8 @@ class DeckStorage:
                 self.add_level(level_id)
 
             source.add_level()
+
+            self.mounts = source.storage.mounts
         else:
             makedirs(self.stack_path)
             os.symlink(realpath(source_path), join(self.stack_path, "0"))
@@ -145,6 +177,13 @@ class Deck:
         storage.create(source_path)
 
         makedirs(deck_path)
+        mounts = Mounts("/etc/mtab", realpath(source_path))
+        if len(mounts):
+            id = deckcache.new_id()
+            deckcache.blob(id, "w").write(str(mounts))
+            
+            storage.mounts = id
+
         deck = cls(deck_path)
         deck.mount()
 
@@ -176,11 +215,16 @@ class Deck:
         levels = self.storage.get_levels()
         levels.reverse()
         aufs.mount(levels, self.path)
+        if self.storage.mounts:
+            Mounts(deckcache.blob(self.storage.mounts)).mount(self.path)
         
     def umount(self):
         if not self.is_mounted():
             raise Error("`%s' not mounted" % self.path)
 
+        if self.storage.mounts:
+            Mounts(deckcache.blob(self.storage.mounts)).umount(self.path)
+            
         aufs.umount(self.path)
 
     def add_level(self):
