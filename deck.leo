@@ -21,12 +21,12 @@
 <v t="zaril.20100821001344.2" a="M"><vh>delete a deck</vh></v>
 <v t="zaril.20100822052346" a="M"><vh>refactor deck storage into a separate class</vh></v>
 <v t="zaril.20100821001344.1" a="M"><vh>deck a deck</vh></v>
-<v t="zaril.20100821001344.3" a="ETV"><vh>get fstab functionality to work</vh>
+<v t="zaril.20100821001344.3"><vh>get fstab functionality to work</vh>
 <v t="zaril.20100823052232"><vh>gotcha: binds don't show up as binds in /proc/mounts</vh></v>
 <v t="zaril.20100822094316"><vh>security gotcha: mounting requires CAP_SYS_ADMIN privileges</vh></v>
 <v t="zaril.20100823064145"><vh>security gotcha: root could edit fstab and "trick" deck into arbitrary mounts</vh></v>
 </v>
-<v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
+<v t="zaril.20100821001344.4" a="TV"><vh>update deck fstab</vh></v>
 </v>
 </v>
 </vnodes>

@@ -3,9 +3,9 @@
 
 Options:
   -m            mounts deck (the default)
-  -u            unmount deck
+  -u            unmount deck (also refresh's the deck's fstab)
+  -r            refresh the deck's fstab (without unmounting)
   -d            delete the deck
-  -r            refresh the deck's fstab
 
 """
 import sys
