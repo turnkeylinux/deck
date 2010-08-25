@@ -18,7 +18,7 @@ class AnonCache:
         self.path = path
 
     def _get_blob_path(self, id):
-        if len(id) < 3 or not id.isalnum():
+        if not id or len(id) < 3 or not id.isalnum():
             raise Error("illegal blob id `%s'" % id)
         
         return join(self.path, id[:2], id[2:])
