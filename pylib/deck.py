@@ -245,6 +245,8 @@ class Deck:
             raise Error("no fstab to refresh - auto-mounting disabled for non-root users")
 
         fstab = str(Mounts("/etc/mtab", self.path))
+        if not self.storage.mounts:
+            self.storage.mounts = deckcache.new_id()
         print >> deckcache.blob(self.storage.mounts, "w"), fstab
 
     def add_level(self):
