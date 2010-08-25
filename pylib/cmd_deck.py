@@ -5,7 +5,7 @@ Options:
   -m            mounts deck (the default)
   -u            unmount deck (also refresh's the deck's fstab)
   -r            refresh the deck's fstab (without unmounting)
-  -d            delete the deck
+  -D            delete the deck
 
 """
 import sys
@@ -40,7 +40,7 @@ class RigidVal:
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'mudr')
+        opts, args = getopt.getopt(sys.argv[1:], 'murD')
     except getopt.GetoptError, e:
         usage(e)
 
@@ -53,7 +53,7 @@ def main():
                 rigid.set(deck.mount)
             elif opt == '-u':
                 rigid.set(deck.umount)
-            elif opt == '-d':
+            elif opt == '-D':
                 rigid.set(deck.delete)
             elif opt == '-r':
                 rigid.set(deck.refresh_fstab)
