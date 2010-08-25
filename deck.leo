@@ -55,30 +55,30 @@ example usage:
     deck / deckedroot
     deck deckedroot
     deck deckedroot fooroot</t>
-<t tx="zaril.20100820192834">.deck/
-    levels.refs/
+<t tx="zaril.20100820192834">
+
+.deck/
+    levels.refs/ # references to overlay levels
         &lt;level-id&gt;/
             &lt;name&gt; -&gt; ../stacks/&lt;name&gt;
     
-    levels
-        &lt;level-id&gt;/
-            &lt;level-id&gt; :=
-                &lt;hash&gt; (generated from &lt;name&gt;-&lt;time&gt;)
-                    if it exists, create another one
+    levels # overlay levels
+        &lt;level-id&gt;/ # &lt;level-id&gt; is a random hash
             
-    stacks/
+    stacks/ # stack structure of decks (which levels in what order)
         &lt;name&gt;/
             0 -&gt; /base
-            1 -&gt; ../../levels/&lt;level-id&gt;
-            2 -&gt; ...
+            1 -&gt; ../../levels/3902bf6c37bdd2d16d92731ed76400ab 
+            2 -&gt; ../../levels/0944b20f5eceec96a2da758182e8516e
     
         &lt;name-derivative&gt;/
             0 -&gt; /base
-            1 -&gt; ../../levels/&lt;level-id&gt;
-            2 -&gt; ...
+            1 -&gt; ../../levels/3902bf6c37bdd2d16d92731ed76400ab
+            2 -&gt; ../../levels/5b04f8c439460a60b200393c1604d5cc
 
-    mounts/
+    mounts/ # pointers to a record of mounts for this deck (if we're root)
         &lt;name&gt;
+	&lt;name-derivative&gt;
 </t>
 <t tx="zaril.20100820193236">Q: how do I name this project?
 
