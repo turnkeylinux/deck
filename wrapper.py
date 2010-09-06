@@ -22,6 +22,9 @@ PATH_LIBEXEC="libexec"
 # are printed in Commands.usage()
 COMMANDS_USAGE_ORDER = []
 
+def get_copyright():
+    return COPYRIGHT % version.get_version()
+
 # this function is designed to work when running in-place source
 # and when running code through a pycompiled installation with execproxy
 def get_av0():
@@ -82,9 +85,20 @@ class Commands:
         for command_name in self._find_commands():
             module = self._get_module(command_name)
             self.commands[command_name] = self.Command(command_name, module)
-    
+
+        # if there's only one command, patch its usage to show copyright
+        if len(self.commands) == 1:
+            command = self.commands.values()[0]
+            module = command.module
+            usage = getattr(module, "usage", None)
+            if usage:
+                def wrapper(*args):
+                    print >> sys.stderr, get_copyright()
+                    return usage(*args)
+                module.usage = wrapper
+
     def usage(self, error=None):
-        print >> sys.stderr, COPYRIGHT % version.get_version()
+        print >> sys.stderr, get_copyright()
         if error:
             print >> sys.stderr, "error: " + str(error)
            
