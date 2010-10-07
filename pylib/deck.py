@@ -29,14 +29,11 @@ def is_deck(path):
         return False
     
 class DeckPaths(Paths):
+    files = ['mounts', 'stacks', 'levels', 'levels.refs']
     def __init__(self, path=None):
         path = join(dirname(realpath(path)), ".deck")
-        Paths.__init__(self, path,
-                       ['mounts',
-                        'stacks',
-                        'levels',
-                        'levels.refs'])
-
+        Paths.__init__(self, path)
+        
 class DeckStorage(object):
     """This class takes care of a deck's representation on the filesystem."""
     class Mounts(object):
