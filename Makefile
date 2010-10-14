@@ -83,8 +83,12 @@ _install: execproxy
 		autoversion HEAD) > $(PATH_INSTALL)/version.txt
 
 #	install -m 4755 _$(progname) $(PATH_BIN)/$(progname) # install SUID 
+	for f in $(progname)*; do \
+		if [ -x $$f ]; then \
+			cp -P $$f $(PATH_BIN); \
+		fi; \
+	done
 	install -m 755 _$(progname) $(PATH_BIN)/$(progname)
-	-cp -P $(progname)-* $(PATH_BIN)	
 
 install-nodoc: pycompile-nodoc _install
 
