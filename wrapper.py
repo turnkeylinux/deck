@@ -46,6 +46,9 @@ def fatal(e):
     sys.exit(1)
     
 class Commands:
+    class Error(Exception):
+        pass
+    
     class Command:
         def __init__(self, name, module):
             self.name = name
@@ -81,6 +84,8 @@ class Commands:
     def __init__(self, path):
         self.path = path
         self.commands = {}
+        self.use_debugger = False
+        self.use_profiler = False
 
         for command_name in self._find_commands():
             module = self._get_module(command_name)
@@ -138,6 +143,18 @@ class Commands:
     def _pre_run(self, name, args):
         sys.argv = [ name ] + args
         command = self.get(name)
+
+        i = 1
+        while i < len(sys.argv):
+            if sys.argv[i] == "--profile":
+                self.use_profiler = True
+                del sys.argv[i]
+            elif sys.argv[i] == "--debug":
+                self.use_debugger = True
+                del sys.argv[i]
+            else:
+                i += 1
+
         if '-h' in args or '--help' in args:
             try:
                 command.module.usage()
@@ -149,19 +166,30 @@ class Commands:
         
     def run(self, name, args):
         command = self._pre_run(name, args)
-        command.module.main()
 
-    def debug(self, name, args):
-        command = self._pre_run(name, args)
+        if self.use_profiler and self.use_debugger:
+            raise self.Error("can't use both profiler and debugger")
+
+        is_running_suid = os.getuid() != os.geteuid()
+        if is_running_suid and self.use_debugger:
+            raise self.Error("won't allow debugger while running suid")
+
+        if self.use_debugger:
+            self._debug(command)
+        elif self.use_profiler:
+            self._profile(command)
+        else:
+            command.module.main()
+
+    def _debug(self, command):
         import pdb
         pdb.runcall(command.module.main)
 
-    def profile(self, name, args):
+    def _profile(self, command):
         import profile
         import pstats
         import tempfile
 
-        command = self._pre_run(name, args)
         statsfile = tempfile.mkstemp(".prof")[1]
         profile.runctx('command.module.main()', globals(), locals(), statsfile)
         pstats.Stats(statsfile).strip_dirs().sort_stats('cumulative').print_stats()
@@ -185,9 +213,6 @@ def main():
     sys.path.insert(0, pylib_path)
 
     commands = Commands(pylib_path)
-
-    use_profiler = False
-    use_debugger = False
     if len(commands) > 1:
         av0 = get_av0()
 
@@ -205,16 +230,9 @@ def main():
                 if opt == '-h':
                     commands.usage()
                 if opt == '-p':
-                    use_profiler = True
+                    commands.use_profiler = True
                 elif opt == '-d':
-                    use_debugger = True
-
-            if use_profiler and use_debugger:
-                fatal("can't use both profiler and debugger")
-
-            is_running_suid = os.getuid() != os.geteuid()
-            if is_running_suid and use_debugger:
-                fatal("won't allow debugger while running suid")
+                    commands.use_debugger = True
 
             if not args:
                 commands.usage()
@@ -229,12 +247,10 @@ def main():
         name = commands.get_names()[0]
         args = sys.argv[1:]
 
-    if use_debugger:
-        commands.debug(name, args)
-    elif use_profiler:
-        commands.profile(name, args)
-    else:
+    try:
         commands.run(name, args)
+    except commands.Error, e:
+        fatal(e)
     
 if __name__=='__main__':
     main()
