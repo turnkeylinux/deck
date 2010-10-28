@@ -88,6 +88,7 @@ _install: execproxy
 			cp -P $$f $(PATH_BIN); \
 		fi; \
 	done
+	rm -f $(PATH_BIN)/$(progname)
 	install -m 755 _$(progname) $(PATH_BIN)/$(progname)
 
 install-nodoc: pycompile-nodoc _install
