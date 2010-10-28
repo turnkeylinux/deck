@@ -21,6 +21,5 @@ sed -i -e "s/^Source:.*/Source: $progname/; \
            s/^Maintainer:.*/Maintainer: $GIT_AUTHOR_NAME <$GIT_AUTHOR_EMAIL>/" debian/control
 
 progchar=$(echo $progname | awk '{ print substr($1,1,1) }')
-sed -i -e "s/^REPODST=.*/REPODST=private\/$progchar\/$progname/" debian/pkginfo
 
 $(dirname $0)/updatelinks.sh
