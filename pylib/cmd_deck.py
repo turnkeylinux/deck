@@ -40,7 +40,7 @@ class RigidVal:
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'murD')
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'murD')
     except getopt.GetoptError, e:
         usage(e)
 
