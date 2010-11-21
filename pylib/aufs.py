@@ -6,7 +6,6 @@ class Error(Exception):
 
 def _command(command, *args):
     command = command + " " + " ".join([ commands.mkarg(arg) for arg in args])
-    
     status, output = commands.getstatusoutput(command)
     if status != 0:
         raise Error("useraufs command failed (%s): %s" % (command, output))
@@ -30,10 +29,10 @@ def mount(branches, path):
     if is_mounted(path):
         return False
 
-    if isinstance(branches, (list, tuple)):
-        branches = ":".join(branches)
-
-    _command("useraufs-mount", "--udba=reval", branches, path)
+    if not isinstance(branches, (list, tuple)):
+        branches = [ branches ]
+        
+    _command("useraufs-mount", "--udba=reval", path, *branches)
     return True
 
 def umount(path):
@@ -47,7 +46,7 @@ def umount(path):
 def remount(operations, path):
     """useraufs-remount <operation[s]> <path>
     <operations> can be a tuple, a list or a string."""
-    if isinstance(operations, (list, tuple)):
-        operations = ",".join(operations)
+    if not isinstance(operations, (list, tuple)):
+        operations = [ operations ]
 
-    _command("useraufs-remount", operations, path)
+    _command("useraufs-remount", path, *operations)
