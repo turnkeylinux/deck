@@ -7,6 +7,6 @@ Standards-Version: 3.6.1
 
 Package: deck
 Architecture: any
-Depends: python (>= 2.4), useraufs
+Depends: python (>= 2.4), turnkey-pylib, useraufs
 Description: overlay-based virtual filesystem branching system
 
