@@ -2,7 +2,7 @@
 <leo_file>
 <leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
 <globals body_outline_ratio="0.5">
-	<global_window_position top="0" left="472" height="933" width="798"/>
+	<global_window_position top="0" left="0" height="933" width="798"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
 </globals>
 <preferences/>
@@ -12,7 +12,7 @@
 <v t="zaril.20100820190533.1" a="E"><vh>design</vh>
 <v t="zaril.20100820193236"><vh>brainstorming</vh></v>
 <v t="zaril.20100820223439"><vh>terminology</vh></v>
-<v t="zaril.20100820192834" a="TV"><vh>file/data structure</vh></v>
+<v t="zaril.20100820192834"><vh>file/data structure</vh></v>
 <v t="zaril.20100820191018" a="E"><vh>cli syntax + psuedo-logic</vh></v>
 </v>
 <v t="zaril.20100820224228" a="E"><vh>implementation</vh>
@@ -28,6 +28,7 @@
 </v>
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
 </v>
+<v t="zaril.20101112070401" a="TV"><vh>todo/wishlist</vh></v>
 </v>
 </vnodes>
 <tnodes>
@@ -391,6 +392,11 @@ SOLUTION:
         anonfile
 
         
+</t>
+<t tx="zaril.20101112070401">list fstab for a given deck
+handle deck umounts correctly
+    if umounting fails, we should remount them
+
 </t>
 </tnodes>
 </leo_file>
