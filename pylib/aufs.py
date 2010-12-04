@@ -1,22 +1,13 @@
 import os
 import commands
 
-class Error(Exception):
-    pass
-
-def _command(command, *args):
-    command = command + " " + " ".join([ commands.mkarg(arg) for arg in args])
-    status, output = commands.getstatusoutput(command)
-    if status != 0:
-        raise Error("useraufs command failed (%s): %s" % (command, output))
-
-    return output
+from executil import getoutput as command
 
 def is_mounted(path):
     """parse useraufs-show output to determine if <path> is mounted"""
     path = os.path.realpath(path)
 
-    unions = [ line.split("\t") for line in _command("useraufs-show").split("\n") if line ]
+    unions = [ line.split("\t") for line in command("useraufs-show").split("\n") if line ]
     for branches, mnt in unions:
         if mnt == path:
             return True
@@ -32,7 +23,7 @@ def mount(branches, path):
     if not isinstance(branches, (list, tuple)):
         branches = [ branches ]
         
-    _command("useraufs-mount", "--udba=reval", path, *branches)
+    command("useraufs-mount", "--udba=reval", path, *branches)
     return True
 
 def umount(path):
@@ -40,7 +31,7 @@ def umount(path):
     if not is_mounted(path):
         return False
 
-    _command("useraufs-umount", path)
+    command("useraufs-umount", path)
     return True
 
 def remount(operations, path):
@@ -49,4 +40,4 @@ def remount(operations, path):
     if not isinstance(operations, (list, tuple)):
         operations = [ operations ]
 
-    _command("useraufs-remount", path, *operations)
+    command("useraufs-remount", path, *operations)
