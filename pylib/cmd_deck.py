@@ -7,6 +7,8 @@ Options:
   -r            refresh the deck's fstab (without unmounting)
   -D            delete the deck
 
+  -t		test if path is a deck
+
 """
 import sys
 import help
@@ -40,7 +42,7 @@ class RigidVal:
 
 def main():
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'murD')
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'tmurD')
     except getopt.GetoptError, e:
         usage(e)
 
@@ -57,6 +59,8 @@ def main():
                 rigid.set(deck.delete)
             elif opt == '-r':
                 rigid.set(deck.refresh_fstab)
+            elif opt == '-t':
+                rigid.set(deck.isdeck)
     except rigid.AlreadySetError:
         fatal("conflicting deck options")
 
@@ -75,7 +79,11 @@ def main():
         usage("bad number of arguments")
 
     try:
-        if func is deck.create:
+        if func is deck.isdeck:
+            path = args[0]
+            error = deck.isdeck(path) != True
+            sys.exit(error)
+        elif func is deck.create:
             source_path, new_deck = args
             func(source_path, new_deck)
         else:

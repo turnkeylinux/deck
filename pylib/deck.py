@@ -269,4 +269,12 @@ def refresh_fstab(deck_path):
 def delete(deck_path):
     Deck.delete(deck_path)
 
+def isdeck(path):
+    try:
+        Deck(path)
+        return True
+    except Error:
+        return False
+    
+
 
