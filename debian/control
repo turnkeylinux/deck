@@ -2,11 +2,11 @@ Source: deck
 Section: misc
 Priority: optional
 Maintainer: Liraz Siri <liraz@turnkeylinux.org>
-Build-Depends: debhelper (>> 4.2.0), python (>= 2.4)
+Build-Depends: pyproject-common
 Standards-Version: 3.6.1
 
 Package: deck
 Architecture: any
-Depends: python (>= 2.4), turnkey-pylib, useraufs
+Depends: pyproject-common, useraufs
 Description: overlay-based virtual filesystem branching system
 
