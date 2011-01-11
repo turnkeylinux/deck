@@ -13,7 +13,7 @@
 <v t="zaril.20100820193236"><vh>brainstorming</vh></v>
 <v t="zaril.20100820223439"><vh>terminology</vh></v>
 <v t="zaril.20100820192834"><vh>file/data structure</vh></v>
-<v t="zaril.20100820191018" a="ETV"><vh>cli syntax + psuedo-logic</vh></v>
+<v t="zaril.20100820191018" a="E"><vh>cli syntax + psuedo-logic</vh></v>
 </v>
 <v t="zaril.20100820224228" a="E"><vh>implementation</vh>
 <v t="zaril.20100820230804" a="M"><vh>fix useraufs to allow usage by root, limited to certain directories</vh></v>
@@ -27,9 +27,9 @@
 <v t="zaril.20100823064145"><vh>security gotcha: root could edit fstab and "trick" deck into arbitrary mounts</vh></v>
 </v>
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
+<v t="zaril.20110111140920" a="ETV"><vh>isdirty</vh></v>
 </v>
 <v t="zaril.20101112070401" a="E"><vh>todo/wishlist</vh>
-<v t="zaril.20110111140920"><vh>isdirty</vh></v>
 <v t="zaril.20110111140920.1"><vh>deck --get-level</vh></v>
 </v>
 </v>
@@ -424,8 +424,6 @@ listdir the level, and remove built-in entries:
     .wh..wh.plink
 
 if its still empty, its empty
-
-
 </t>
 <t tx="zaril.20110111140920.1">--get-level last path/to/deck
 set last on stacks

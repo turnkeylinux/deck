@@ -8,7 +8,7 @@ Options:
   -D            delete the deck
 
   -t		test if path is a deck
-
+  --isdirty     test if deck is dirty
 """
 import sys
 import help
@@ -42,7 +42,8 @@ class RigidVal:
 
 def main():
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'tmurD')
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'tmurD',
+                                       ['isdirty'])
     except getopt.GetoptError, e:
         usage(e)
 
@@ -61,6 +62,8 @@ def main():
                 rigid.set(deck.refresh_fstab)
             elif opt == '-t':
                 rigid.set(deck.isdeck)
+            elif opt == '--isdirty':
+                rigid.set(deck.isdirty)
     except rigid.AlreadySetError:
         fatal("conflicting deck options")
 
@@ -79,9 +82,9 @@ def main():
         usage("bad number of arguments")
 
     try:
-        if func is deck.isdeck:
+        if func in (deck.isdeck, deck.isdirty):
             path = args[0]
-            error = deck.isdeck(path) != True
+            error = func(path) != True
             sys.exit(error)
         elif func is deck.create:
             source_path, new_deck = args

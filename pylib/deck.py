@@ -163,6 +163,14 @@ class DeckStorage(object):
 
         return levels
 
+    def isdirty(self):
+        last_level = self.get_levels()[-1]
+        for fname in os.listdir(last_level):
+            if fname not in ('.wh..wh.aufs', '.wh..wh.plink'):
+                return True
+
+        return False
+
 class Deck:
     """This class is the front-end of a deck"""
     @classmethod
@@ -253,6 +261,9 @@ class Deck:
             operations = ("mod:%s=ro" % beforelast,
                           "prepend:%s=rw" % last)
             aufs.remount(operations, self.path)
+
+    def isdirty(self):
+        return self.storage.isdirty()
         
 def create(source_path, deck_path):
     Deck.init_create(source_path, deck_path)
@@ -275,6 +286,11 @@ def isdeck(path):
         return True
     except Error:
         return False
+
+def isdirty(path):
+    return Deck(path).isdirty()
+
+
     
 
 
