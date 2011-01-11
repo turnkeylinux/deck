@@ -27,11 +27,10 @@
 <v t="zaril.20100823064145"><vh>security gotcha: root could edit fstab and "trick" deck into arbitrary mounts</vh></v>
 </v>
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
-<v t="zaril.20110111140920" a="ETV"><vh>isdirty</vh></v>
+<v t="zaril.20110111140920"><vh>isdirty</vh></v>
+<v t="zaril.20110111140920.1" a="TV"><vh>deck --get-level</vh></v>
 </v>
-<v t="zaril.20101112070401" a="E"><vh>todo/wishlist</vh>
-<v t="zaril.20110111140920.1"><vh>deck --get-level</vh></v>
-</v>
+<v t="zaril.20101112070401" a="E"><vh>todo/wishlist</vh></v>
 </v>
 </vnodes>
 <tnodes>

@@ -2,14 +2,16 @@
 """Deck a filesystem
 
 Options:
-  -m            mounts deck (the default)
-  -u            unmount deck (also refresh's the deck's fstab)
-  -r            refresh the deck's fstab (without unmounting)
-  -D            delete the deck
+  -m            	mounts deck (the default)
+  -u            	unmount deck (also refresh's the deck's fstab)
+  -r            	refresh the deck's fstab (without unmounting)
+  -D            	delete the deck
 
-  -t --isdeck   test if path is a deck
-     --isdirty  test if deck is dirty
-     
+  --get-level=INDEX	print path of deck level
+                        INDEX := <integer> | first | last
+
+  -t --isdeck   	test if path is a deck
+     --isdirty  	test if deck is dirty
 """
 import sys
 import help
@@ -41,13 +43,20 @@ class RigidVal:
     def get(self):
         return self.val
 
+def print_level(path, level):
+    try:
+        print deck.Deck(path).storage.get_levels()[level]
+    except IndexError:
+        fatal("illegal deck level (%d)" % level)
+
 def main():
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], 'tmurD',
-                                       ['isdirty', 'isdeck'])
+                                       ['isdirty', 'isdeck', 'get-level='])
     except getopt.GetoptError, e:
         usage(e)
 
+    opt_get_level = None
     rigid = RigidVal()
     try:
         for opt, val in opts:
@@ -65,6 +74,13 @@ def main():
                 rigid.set(deck.isdeck)
             elif opt == '--isdirty':
                 rigid.set(deck.isdirty)
+            elif opt == '--get-level':
+                if val == 'first':
+                    opt_get_level = 0
+                elif val == 'last':
+                    opt_get_level = -1
+                else:
+                    opt_get_level = int(val)
     except rigid.AlreadySetError:
         fatal("conflicting deck options")
 
@@ -83,8 +99,10 @@ def main():
         usage("bad number of arguments")
 
     try:
-        if func in (deck.isdeck, deck.isdirty):
-            path = args[0]
+        path = args[0]
+        if opt_get_level is not None:
+            print_level(path, opt_get_level)
+        elif func in (deck.isdeck, deck.isdirty):
             error = func(path) != True
             sys.exit(error)
         elif func is deck.create:
