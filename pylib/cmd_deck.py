@@ -7,8 +7,9 @@ Options:
   -r            refresh the deck's fstab (without unmounting)
   -D            delete the deck
 
-  -t		test if path is a deck
-  --isdirty     test if deck is dirty
+  -t --isdeck   test if path is a deck
+     --isdirty  test if deck is dirty
+     
 """
 import sys
 import help
@@ -43,7 +44,7 @@ class RigidVal:
 def main():
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], 'tmurD',
-                                       ['isdirty'])
+                                       ['isdirty', 'isdeck'])
     except getopt.GetoptError, e:
         usage(e)
 
@@ -60,7 +61,7 @@ def main():
                 rigid.set(deck.delete)
             elif opt == '-r':
                 rigid.set(deck.refresh_fstab)
-            elif opt == '-t':
+            elif opt in ('-t', '--isdeck'):
                 rigid.set(deck.isdeck)
             elif opt == '--isdirty':
                 rigid.set(deck.isdirty)
