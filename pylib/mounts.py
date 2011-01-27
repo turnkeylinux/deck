@@ -11,7 +11,7 @@ class Error(Exception):
     pass
 
 def is_mounted(dir):
-    return Mounts("/proc/mounts").exists(realpath(dir))
+    return Mounts().exists(realpath(dir))
 
 def system(*args):
     error = subprocess.call(args)
@@ -56,28 +56,8 @@ class Mount:
         return is_mounted(realdir)
 
 class Mounts:
-    def __init__(self, fstab, root=None):
-        """Initialize mounts from <fstab>, which can be a file path, a file handle,
-        or a string containing fstab-like values.
-        
-        if <root> is specified, filter mounts to submounts under the root"""
-
-        self.mounts = []
-        if isinstance(fstab, file):
-            fh = fstab
-        else:
-            fstab = str(fstab)
-            if exists(fstab):
-                try:
-                    fh = file(fstab)
-                except IOError, e:
-                    raise Error(e)
-            else:
-                fh = StringIO(fstab)
-
-        if root:
-            root = realpath(root)
-        
+    @staticmethod
+    def _parse(fh, root):
         for line in fh.readlines():
             line = line.strip()
             if not line or line.startswith("#"):
@@ -90,7 +70,7 @@ class Mounts:
             device, dir, type, opts = vals[:4]
             if not dir.startswith("/"):
                 dir = "/" + dir
-                
+
             if root:
                 dir = realpath(dir)
                 # skip mounts that arne't subdirectories of root
@@ -100,8 +80,43 @@ class Mounts:
                 if root != "/":
                     dir = dir[len(root):]
 
-            mount = Mount(device, dir, type, opts)
-            self.mounts.append(mount)
+            yield Mount(device, dir, type, opts)
+            
+    def __init__(self, root=None, fstab=None):
+        """Initialize a list of mounts under <root> (defaults to /)
+
+        By default we merge /etc/mtab and /proc/mounts, unless
+        <fstab> is provided.
+
+        <fstab> can be a file path, a file handle, or a string containing
+        fstab-like values"""
+
+        self.mounts = []
+        if root:
+            root = realpath(root)
+
+        if fstab:
+            if isinstance(fstab, file):
+                fh = fstab
+            else:
+                fstab = str(fstab)
+                if exists(fstab):
+                    try:
+                        fh = file(fstab)
+                    except IOError, e:
+                        raise Error(e)
+                else:
+                    fh = StringIO(fstab)
+
+            for mount in self._parse(fh, root):
+                self.mounts.append(mount)
+        else:
+            for mount in self._parse(file("/etc/mtab"), root):
+                self.mounts.append(mount)
+
+            for mount in self._parse(file("/proc/mounts"), root):
+                if not self.exists(mount.dir):
+                    self.mounts.append(mount)
 
         self.root = root
 

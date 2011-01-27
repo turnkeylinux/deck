@@ -36,7 +36,7 @@ class DeckPaths(Paths):
         
 class DeckStorage(object):
     """This class takes care of a deck's representation on the filesystem."""
-    class Mounts(object):
+    class MountsAttr(object):
         def __get__(self, obj, type):
             if obj is None:
                 return None
@@ -58,7 +58,7 @@ class DeckStorage(object):
             else:
                 file(path, "w").write(val + "\n")
 
-    mounts = Mounts()
+    mounts = MountsAttr()
     
     def __init__(self, deck_path):
         self.name = basename(deck_path.rstrip('/'))
@@ -190,7 +190,7 @@ class Deck:
 
         makedirs(deck_path)
         if os.geteuid() == 0:
-            mounts = Mounts("/etc/mtab", source_path)
+            mounts = Mounts(source_path)
             if len(mounts):
                 id = deckcache.new_id()
                 deckcache.blob(id, "w").write(str(mounts))
@@ -236,7 +236,7 @@ class Deck:
         levels.reverse()
         aufs.mount(levels, self.path)
         if os.geteuid() == 0 and self.storage.mounts:
-            Mounts(deckcache.blob(self.storage.mounts)).mount(self.path)
+            Mounts(fstab=deckcache.blob(self.storage.mounts)).mount(self.path)
         
     def umount(self):
         if not self.is_mounted():
@@ -244,7 +244,7 @@ class Deck:
 
         if os.geteuid() == 0 and self.storage.mounts:
             self.refresh_fstab()
-            Mounts(deckcache.blob(self.storage.mounts)).umount(self.path)
+            Mounts(fstab=deckcache.blob(self.storage.mounts)).umount(self.path)
             
         aufs.umount(self.path)
 
@@ -255,7 +255,7 @@ class Deck:
         if os.geteuid() != 0:
             raise Error("no fstab to refresh - auto-mounting disabled for non-root users")
 
-        fstab = str(Mounts("/etc/mtab", self.path))
+        fstab = str(Mounts(self.path))
         if not self.storage.mounts:
             self.storage.mounts = deckcache.new_id()
         print >> deckcache.blob(self.storage.mounts, "w"), fstab

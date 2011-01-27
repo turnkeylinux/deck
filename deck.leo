@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <leo_file>
 <leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
-<globals body_outline_ratio="0.367631296892">
+<globals body_outline_ratio="0.248660235798">
 	<global_window_position top="0" left="569" height="933" width="701"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
 </globals>
@@ -29,9 +29,13 @@
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
 <v t="zaril.20110111140920"><vh>isdirty</vh></v>
 <v t="zaril.20110111140920.1"><vh>deck --get-level</vh></v>
-<v t="zaril.20110127063535" a="ETV"><vh>don't branch if not dirty</vh></v>
+<v t="zaril.20110127063535"><vh>don't branch if not dirty</vh></v>
+<v t="zaril.20110127091732"><vh>bug: Deck doesn't see mounts made inside the chroot</vh></v>
 </v>
-<v t="zaril.20101112070401" a="E"><vh>todo/wishlist</vh></v>
+<v t="zaril.20101112070401" a="E"><vh>todo/wishlist</vh>
+<v t="zaril.20110127070852.1" a="ETV"><vh>bug: deck doesn't handle umounts correctly</vh></v>
+<v t="zaril.20110127070852"><vh>list fstab for a given deck</vh></v>
+</v>
 </v>
 </vnodes>
 <tnodes>
@@ -399,18 +403,7 @@ SOLUTION:
 
         
 </t>
-<t tx="zaril.20101112070401">list fstab for a given deck
-
-handle deck umounts correctly
-    if umounting fails, we should remount them
-
-
-
-
-
-
-
-</t>
+<t tx="zaril.20101112070401"></t>
 <t tx="zaril.20110111140920">--isdirty
     returns true if deck is dirty 
         if last layer has been written to
@@ -461,12 +454,38 @@ deck --option path/to/deck
 IDEA:
     if we deck an non-dirty deck, we can skip the last level altogether
 
-
 LOGIC:
     we only need to clone last level if the deck is dirty
 
 
 
+</t>
+<t tx="zaril.20110127070852"></t>
+<t tx="zaril.20110127070852.1">IDEAS:
+    if umounting fails, we should remount the filesystems we unmounted
+
+TEST:
+    deck /chroot/feisty.1
+    dchroot
+        mount -t proc none /proc; mount -t devpts none /dev/pts
+        
+    while inside, try to deck -u /chroot/feisty.1
+    filesystems should be remounted when this fails
+
+
+
+
+
+
+</t>
+<t tx="zaril.20110127091732">PROBLEM:
+    it reads /etc/mtab
+         because it needs option to reproduce the mount accurately (I think)
+
+SOLUTION
+    merge /etc/mtab with /proc/mounts by default
+        prefer /etc/mtab entries
+    
 </t>
 </tnodes>
 </leo_file>
