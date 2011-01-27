@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <leo_file>
 <leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
-<globals body_outline_ratio="0.5">
-	<global_window_position top="0" left="573" height="933" width="701"/>
+<globals body_outline_ratio="0.367631296892">
+	<global_window_position top="0" left="569" height="933" width="701"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
 </globals>
 <preferences/>
@@ -28,7 +28,8 @@
 </v>
 <v t="zaril.20100821001344.4"><vh>update deck fstab</vh></v>
 <v t="zaril.20110111140920"><vh>isdirty</vh></v>
-<v t="zaril.20110111140920.1" a="TV"><vh>deck --get-level</vh></v>
+<v t="zaril.20110111140920.1"><vh>deck --get-level</vh></v>
+<v t="zaril.20110127063535" a="ETV"><vh>don't branch if not dirty</vh></v>
 </v>
 <v t="zaril.20101112070401" a="E"><vh>todo/wishlist</vh></v>
 </v>
@@ -448,5 +449,24 @@ deck --option path/to/deck
 
     
     </t>
+<t tx="zaril.20110127063535">TEST:
+    mkdir directory
+    deck directory directory.1
+
+    deck directory.1 directory.2
+    deck -D directory.2
+    deck directory.1 directory.2
+
+
+IDEA:
+    if we deck an non-dirty deck, we can skip the last level altogether
+
+
+LOGIC:
+    we only need to clone last level if the deck is dirty
+
+
+
+</t>
 </tnodes>
 </leo_file>

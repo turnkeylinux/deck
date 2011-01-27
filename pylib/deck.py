@@ -113,11 +113,17 @@ class DeckStorage(object):
             levels = source.storage.get_levels()
             makedirs(self.stack_path)
             os.symlink(levels[0], join(self.stack_path, "0"))
-            for level in levels[1:]:
+
+            # we only need to clone last level if the deck is dirty
+            if source.isdirty():
+                levels = levels[1:]
+                source.add_level()
+            else:
+                levels = levels[1:-1] 
+                
+            for level in levels:
                 level_id = basename(level)
                 self.add_level(level_id)
-
-            source.add_level()
 
             self.mounts = source.storage.mounts
         else:
