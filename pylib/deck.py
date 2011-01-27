@@ -36,7 +36,7 @@ class DeckPaths(Paths):
         
 class DeckStorage(object):
     """This class takes care of a deck's representation on the filesystem."""
-    class MountsAttr(object):
+    class MountsID(object):
         def __get__(self, obj, type):
             if obj is None:
                 return None
@@ -58,7 +58,7 @@ class DeckStorage(object):
             else:
                 file(path, "w").write(val + "\n")
 
-    mounts = MountsAttr()
+    mounts_id = MountsID()
     
     def __init__(self, deck_path):
         self.name = basename(deck_path.rstrip('/'))
@@ -125,7 +125,7 @@ class DeckStorage(object):
                 level_id = basename(level)
                 self.add_level(level_id)
 
-            self.mounts = source.storage.mounts
+            self.mounts_id = source.storage.mounts_id
         else:
             makedirs(self.stack_path)
             os.symlink(realpath(source_path), join(self.stack_path, "0"))
@@ -150,7 +150,7 @@ class DeckStorage(object):
                 shutil.rmtree(level_path)
 
         shutil.rmtree(self.stack_path)
-        self.mounts = None
+        self.mounts_id = None
         
         # if .deck isn't handling storage for any more decks, delete it
         if not os.listdir(self.paths.stacks):
@@ -195,12 +195,12 @@ class Deck:
                 id = deckcache.new_id()
                 deckcache.blob(id, "w").write(str(mounts))
 
-                storage.mounts = id
-            elif storage.mounts:
+                storage.mounts_id = id
+            elif storage.mounts_id:
                 # make an identical copy of the blob
                 newid = deckcache.new_id()
-                print >> deckcache.blob(newid, "w"), deckcache.blob(storage.mounts).read()
-                storage.mounts = newid
+                print >> deckcache.blob(newid, "w"), deckcache.blob(storage.mounts_id).read()
+                storage.mounts_id = newid
 
         deck = cls(deck_path)
         deck.mount()
@@ -215,8 +215,8 @@ class Deck:
         os.rmdir(deck_path)
 
         storage = DeckStorage(deck_path)
-        if os.geteuid() == 0 and storage.mounts:
-            deckcache.delete(storage.mounts)
+        if os.geteuid() == 0 and storage.mounts_id:
+            deckcache.delete(storage.mounts_id)
         storage.delete()
         
     def __init__(self, path):
@@ -235,8 +235,8 @@ class Deck:
         levels = self.storage.get_levels()
         levels.reverse()
         aufs.mount(levels, self.path)
-        if os.geteuid() == 0 and self.storage.mounts:
-            Mounts(fstab=deckcache.blob(self.storage.mounts)).mount(self.path)
+        if os.geteuid() == 0 and self.storage.mounts_id:
+            Mounts(fstab=deckcache.blob(self.storage.mounts_id)).mount(self.path)
         
     def umount(self):
         if not self.is_mounted():
@@ -244,7 +244,7 @@ class Deck:
 
         if os.geteuid() == 0:
             self.refresh_fstab()
-            mounts = Mounts(fstab=deckcache.blob(self.storage.mounts))
+            mounts = Mounts(fstab=deckcache.blob(self.storage.mounts_id))
 
             mounts.umount(self.path)
             try:
@@ -263,16 +263,16 @@ class Deck:
             raise Error("no fstab to refresh - auto-mounting disabled for non-root users")
 
         fstab = str(Mounts(self.path))
-        if not self.storage.mounts:
-            self.storage.mounts = deckcache.new_id()
-        print >> deckcache.blob(self.storage.mounts, "w"), fstab
+        if not self.storage.mounts_id:
+            self.storage.mounts_id = deckcache.new_id()
+        print >> deckcache.blob(self.storage.mounts_id, "w"), fstab
 
     def get_fstab(self):
         if self.is_mounted():
             self.refresh_fstab()
             
-        if self.storage.mounts:
-            return deckcache.blob(self.storage.mounts).read().strip()
+        if self.storage.mounts_id:
+            return deckcache.blob(self.storage.mounts_id).read().strip()
         return ""
 
     def add_level(self):
