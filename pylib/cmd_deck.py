@@ -11,8 +11,8 @@ Options:
   --get-level=INDEX	print path of deck level
                         INDEX := <integer> | first | last
 
-  -t --isdeck   	test if path is a deck
-     --isdirty  	test if deck is dirty
+  --isdeck     	        test if path is a deck
+  --isdirty  	        test if deck is dirty
 """
 import sys
 import help
@@ -52,7 +52,7 @@ def print_level(path, level):
 
 def main():
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'tmurD',
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'murD',
                                        ['isdirty', 'isdeck', 'get-fstab', 'get-level='])
     except getopt.GetoptError, e:
         usage(e)
@@ -71,7 +71,7 @@ def main():
                 rigid.set(deck.delete)
             elif opt == '-r':
                 rigid.set(deck.refresh_fstab)
-            elif opt in ('-t', '--isdeck'):
+            elif opt == '--isdeck':
                 rigid.set(deck.isdeck)
             elif opt == '--isdirty':
                 rigid.set(deck.isdirty)
