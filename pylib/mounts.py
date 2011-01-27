@@ -153,7 +153,6 @@ class Mounts:
         unmounted = []
         for mount in reversed(self.mounts):
             try:
-                print "mount.dir=" + mount.dir
                 mount.umount(root)
             except:
                 for mount in reversed(unmounted):

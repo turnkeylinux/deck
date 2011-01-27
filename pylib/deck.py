@@ -267,6 +267,14 @@ class Deck:
             self.storage.mounts = deckcache.new_id()
         print >> deckcache.blob(self.storage.mounts, "w"), fstab
 
+    def get_fstab(self):
+        if self.is_mounted():
+            self.refresh_fstab()
+            
+        if self.storage.mounts:
+            return deckcache.blob(self.storage.mounts).read().strip()
+        return ""
+
     def add_level(self):
         self.storage.add_level()
         if self.is_mounted():
@@ -292,6 +300,9 @@ def refresh_fstab(deck_path):
 
 def delete(deck_path):
     Deck.delete(deck_path)
+
+def get_fstab(deck_path):
+    return Deck(deck_path).get_fstab()
 
 def isdeck(path):
     try:

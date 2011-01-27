@@ -7,6 +7,7 @@ Options:
   -r            	refresh the deck's fstab (without unmounting)
   -D            	delete the deck
 
+  --get-fstab           print fstab of deck
   --get-level=INDEX	print path of deck level
                         INDEX := <integer> | first | last
 
@@ -52,7 +53,7 @@ def print_level(path, level):
 def main():
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], 'tmurD',
-                                       ['isdirty', 'isdeck', 'get-level='])
+                                       ['isdirty', 'isdeck', 'get-fstab', 'get-level='])
     except getopt.GetoptError, e:
         usage(e)
 
@@ -74,6 +75,8 @@ def main():
                 rigid.set(deck.isdeck)
             elif opt == '--isdirty':
                 rigid.set(deck.isdirty)
+            elif opt == '--get-fstab':
+                rigid.set(deck.get_fstab)
             elif opt == '--get-level':
                 if val == 'first':
                     opt_get_level = 0
@@ -81,6 +84,7 @@ def main():
                     opt_get_level = -1
                 else:
                     opt_get_level = int(val)
+            
     except rigid.AlreadySetError:
         fatal("conflicting deck options")
 
@@ -105,6 +109,8 @@ def main():
         elif func in (deck.isdeck, deck.isdirty):
             error = func(path) != True
             sys.exit(error)
+        elif func is deck.get_fstab:
+            print deck.get_fstab(path)
         elif func is deck.create:
             source_path, new_deck = args
             func(source_path, new_deck)
