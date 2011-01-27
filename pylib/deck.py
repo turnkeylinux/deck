@@ -242,9 +242,16 @@ class Deck:
         if not self.is_mounted():
             raise Error("`%s' not mounted" % self.path)
 
-        if os.geteuid() == 0 and self.storage.mounts:
+        if os.geteuid() == 0:
             self.refresh_fstab()
-            Mounts(fstab=deckcache.blob(self.storage.mounts)).umount(self.path)
+            mounts = Mounts(fstab=deckcache.blob(self.storage.mounts))
+
+            mounts.umount(self.path)
+            try:
+                aufs.umount(self.path)
+            except:
+                mounts.mount(self.path)
+                raise
             
         aufs.umount(self.path)
 

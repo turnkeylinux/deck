@@ -150,5 +150,13 @@ class Mounts:
         if root is None:
             root = self.root
 
+        unmounted = []
         for mount in reversed(self.mounts):
-            mount.umount(root)
+            try:
+                print "mount.dir=" + mount.dir
+                mount.umount(root)
+            except:
+                for mount in reversed(unmounted):
+                    mount.mount(root)
+                raise
+            unmounted.append(mount)
