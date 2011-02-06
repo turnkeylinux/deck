@@ -115,7 +115,7 @@ class DeckStorage(object):
             os.symlink(levels[0], join(self.stack_path, "0"))
 
             # we only need to clone last level if the deck is dirty
-            if source.isdirty():
+            if source.is_dirty():
                 levels = levels[1:]
                 source.add_level()
             else:
@@ -169,7 +169,7 @@ class DeckStorage(object):
 
         return levels
 
-    def isdirty(self):
+    def is_dirty(self):
         last_level = self.get_levels()[-1]
         for fname in os.listdir(last_level):
             if fname not in ('.wh..wh.aufs', '.wh..wh.plink'):
@@ -283,8 +283,8 @@ class Deck:
                           "prepend:%s=rw" % last)
             aufs.remount(operations, self.path)
 
-    def isdirty(self):
-        return self.storage.isdirty()
+    def is_dirty(self):
+        return self.storage.is_dirty()
         
 def create(source_path, deck_path):
     Deck.init_create(source_path, deck_path)
@@ -304,16 +304,16 @@ def delete(deck_path):
 def get_fstab(deck_path):
     return Deck(deck_path).get_fstab()
 
-def isdeck(path):
+def is_deck(path):
     try:
         Deck(path)
         return True
     except Error:
         return False
 
-def isdirty(path):
-    return Deck(path).isdirty()
+def is_dirty(path):
+    return Deck(path).is_dirty()
 
-def ismounted(path):
+def is_mounted(path):
     return Deck(path).is_mounted()
 

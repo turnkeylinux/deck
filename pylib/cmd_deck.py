@@ -73,11 +73,11 @@ def main():
             elif opt == '-r':
                 rigid.set(deck.refresh_fstab)
             elif opt == '--isdeck':
-                rigid.set(deck.isdeck)
+                rigid.set(deck.is_deck)
             elif opt == '--isdirty':
-                rigid.set(deck.isdirty)
+                rigid.set(deck.is_dirty)
             elif opt == '--ismounted':
-                rigid.set(deck.ismounted)
+                rigid.set(deck.is_mounted)
             elif opt == '--get-fstab':
                 rigid.set(deck.get_fstab)
             elif opt == '--get-level':
@@ -109,7 +109,7 @@ def main():
         path = args[0]
         if opt_get_level is not None:
             print_level(path, opt_get_level)
-        elif func in (deck.isdeck, deck.isdirty, deck.ismounted):
+        elif func in (deck.is_deck, deck.is_dirty, deck.is_mounted):
             error = func(path) != True
             sys.exit(error)
         elif func is deck.get_fstab:
