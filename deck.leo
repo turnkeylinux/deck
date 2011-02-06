@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <leo_file>
 <leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
-<globals body_outline_ratio="0.337620578778">
+<globals body_outline_ratio="0.412647374062">
 	<global_window_position top="0" left="569" height="933" width="701"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
 </globals>
@@ -32,7 +32,8 @@
 <v t="zaril.20110127063535"><vh>don't branch if not dirty</vh></v>
 <v t="zaril.20110127091732"><vh>bug: Deck doesn't see mounts made inside the chroot</vh></v>
 <v t="zaril.20110127070852.1" a="E"><vh>bug: deck doesn't handle umounts correctly</vh></v>
-<v t="zaril.20110127070852" a="TV"><vh>list fstab for a given deck</vh></v>
+<v t="zaril.20110127070852"><vh>list fstab for a given deck</vh></v>
+<v t="zaril.20110206182355" a="TV"><vh>deck --ismounted</vh></v>
 </v>
 <v t="zaril.20101112070401" a="E"><vh>todo/wishlist</vh></v>
 </v>
@@ -489,5 +490,6 @@ SOLUTION
         prefer /etc/mtab entries
     
 </t>
+<t tx="zaril.20110206182355"></t>
 </tnodes>
 </leo_file>

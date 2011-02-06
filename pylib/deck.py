@@ -314,7 +314,6 @@ def isdeck(path):
 def isdirty(path):
     return Deck(path).isdirty()
 
-
-    
-
+def ismounted(path):
+    return Deck(path).is_mounted()
 

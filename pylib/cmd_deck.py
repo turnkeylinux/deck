@@ -13,6 +13,7 @@ Options:
 
   --isdeck     	        test if path is a deck
   --isdirty  	        test if deck is dirty
+  --ismounted           test if deck is mounted
 """
 import sys
 import help
@@ -53,7 +54,7 @@ def print_level(path, level):
 def main():
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], 'murD',
-                                       ['isdirty', 'isdeck', 'get-fstab', 'get-level='])
+                                       ['isdirty', 'isdeck', 'ismounted', 'get-fstab', 'get-level='])
     except getopt.GetoptError, e:
         usage(e)
 
@@ -75,6 +76,8 @@ def main():
                 rigid.set(deck.isdeck)
             elif opt == '--isdirty':
                 rigid.set(deck.isdirty)
+            elif opt == '--ismounted':
+                rigid.set(deck.ismounted)
             elif opt == '--get-fstab':
                 rigid.set(deck.get_fstab)
             elif opt == '--get-level':
@@ -106,7 +109,7 @@ def main():
         path = args[0]
         if opt_get_level is not None:
             print_level(path, opt_get_level)
-        elif func in (deck.isdeck, deck.isdirty):
+        elif func in (deck.isdeck, deck.isdirty, deck.ismounted):
             error = func(path) != True
             sys.exit(error)
         elif func is deck.get_fstab:
