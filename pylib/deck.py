@@ -186,9 +186,9 @@ class Deck:
             raise Error("`%s' exists and is not an empty directory" % deck_path)
 
         storage = DeckStorage(deck_path)
+        makedirs(deck_path)
         storage.create(source_path)
 
-        makedirs(deck_path)
         if os.geteuid() == 0:
             mounts = Mounts(source_path)
             if len(mounts):
