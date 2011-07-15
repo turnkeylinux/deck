@@ -1,0 +1,47 @@
+==================
+v1.0 Release Notes
+==================
+
+* new options to query information from a deck::
+
+ --isdeck              test if path is a deck
+ --get-fstab           print fstab of deck
+ --get-level=INDEX     print path of deck level
+                       INDEX := <integer> | first | last
+
+ --isdirty             test if deck is dirty
+ --ismounted           test if deck is mounted
+
+* renamed -d option to -D (safer)
+
+* bugfixes
+
+  - we only need to clone last level if the deck is dirty
+
+  - if any umount fails, remount everything
+
+    the state of a deck after a failed umount should be the same as
+    before the umount was attempted.
+
+  - deck doesn't see mounts made inside the chroot
+
+    Previously Mounts() were read from either /etc/mtab or /proc/mounts.
+    If you mounted a device from inside the chroot then /etc/mtab would
+    not be updated in the parent.
+  
+    Solution: by default, Mounts() merges information from /etc/mtab and
+    /proc/mounts, with priority given to /etc/mtab because it contains
+    more information.
+
+  - fixed anoncache blob id sanity checking
+
+* packaging changes
+
+  - added short description to debian/control
+  - added useraufs dependency
+
+* use gnu_getopt instead of getopt
+
+* porting to pyproject 1.0
+
+* minor refactorings
