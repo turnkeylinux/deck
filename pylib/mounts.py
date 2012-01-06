@@ -73,7 +73,7 @@ class Mounts:
 
             if root:
                 dir = realpath(dir)
-                # skip mounts that arne't subdirectories of root
+                # skip mounts that are not subdirectories of root
                 if dir == root or not dir.startswith(root + "/"):
                     continue
 
