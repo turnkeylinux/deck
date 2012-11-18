@@ -1,7 +1,7 @@
 import os
 import time
-import md5
 import random
+import hashlib
 from utils import makedirs
 
 from os.path import *
@@ -28,7 +28,7 @@ class AnonCache:
     
     def new_id(self, seed=None):
         def digest(s):
-            return md5.md5(s).hexdigest()
+            return hashlib.md5(s).hexdigest()
 
         id = digest(`seed` + `time.time()` + `random.SystemRandom().getrandbits(128)`)
         while self.exists(id):

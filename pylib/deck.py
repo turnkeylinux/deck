@@ -1,10 +1,10 @@
 from os.path import *
 
 import os
-import md5
 import time
 import errno
 import shutil
+import hashlib
 
 from paths import Paths
 
@@ -68,7 +68,7 @@ class DeckStorage(object):
     def _new_level_id(self):
         """calculates a guaranteed unique new level_id"""
         def digest(s):
-            return md5.md5(s).hexdigest()
+            return hashlib.md5(s).hexdigest()
         
         level_id = digest(self.name + `time.time()`)
         while exists(join(self.paths.levels, level_id)):
