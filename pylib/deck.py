@@ -181,7 +181,7 @@ class DeckStorage(object):
     def is_dirty(self):
         last_level = self.get_levels()[-1]
         for fname in os.listdir(last_level):
-            if fname not in ('.wh..wh.aufs', '.wh..wh.plink'):
+            if fname not in ('.wh..wh.aufs', '.wh..wh.plink', '.wh..wh.orph', '.wh..wh.plnk'):
                 return True
 
         return False
