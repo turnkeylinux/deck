@@ -139,8 +139,6 @@ class DeckStorage(object):
             makedirs(self.stack_path)
             os.symlink(realpath(source_path), join(self.stack_path, "0"))
 
-        self.add_level()
-        
     def delete(self):
         symlinks = os.listdir(self.stack_path)
         symlinks.sort()
@@ -213,6 +211,7 @@ class Deck:
 
         deck = cls(deck_path)
         deck.mount()
+        deck.add_level()
 
         return deck
 
@@ -288,7 +287,7 @@ class Deck:
         self.storage.add_level()
         if self.is_mounted():
             beforelast, last = self.storage.get_levels()[-2:]
-            operations = ("mod:%s=ro" % beforelast,
+            operations = ("mod:%s=ro+wh" % beforelast,
                           "prepend:%s=rw" % last)
             aufs.remount(operations, self.path)
 
