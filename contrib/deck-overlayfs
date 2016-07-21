@@ -34,7 +34,11 @@ deck_mount() {
     local parent=$(realpath $1)
     local mountpath=$(realpath $2)
     [ -d $parent ] || fatal "parent does not exist"
-    [ -d $mountpath ] && fatal "mountpath already exists"
+    
+    if [ -d $mountpath ]; then
+        [ "$(find $mountpath -maxdepth 0 -empty)" ] || \
+            fatal "mountpath exists but not empty"
+    fi
 
     local deckdir=$(dirname $mountpath)/.deck/$(basename $mountpath)
     local workdir=$deckdir/work
@@ -52,7 +56,7 @@ deck_mount() {
         echo $parent > $deckdir/layers
     fi
 
-    mkdir $mountpath
+    mkdir -p $mountpath
     local lowerdir=$(cat $deckdir/layers | tr '\n' ':' | sed 's/:$//')
     local options="lowerdir=$lowerdir,upperdir=$upperdir,workdir=$workdir"
     mount -t overlay overlay -o $options $mountpath
@@ -65,7 +69,6 @@ deck_remount() {
     deck_isdeck $mountpath || fatal "not a deck"
     local deckdir=$(dirname $mountpath)/.deck/$(basename $mountpath)
     local parent=$(cat $deckdir/parent)
-    rmdir $mountpath || fatal "mountpath not empty"
     deck_mount $parent $mountpath
 }
 
