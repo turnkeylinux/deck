@@ -7,6 +7,6 @@ Standards-Version: 3.6.1
 
 Package: deck
 Architecture: any
-Depends: pyproject-common, useraufs
+Depends: pyproject-common
 Description: overlay-based virtual filesystem branching system
 
