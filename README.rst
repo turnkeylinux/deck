@@ -1,3 +1,11 @@
+IMPORTANT NOTE:
+===============
+
+This README applies to v1.x of Deck. An updated readme for the v2.0
+release of deck have not yet been developed.
+
+----
+
 Deck is very simple, but its a bit hard to explain. Basically its a
 high-level interface to overlays with a couple of tricks up its
 sleeve.
