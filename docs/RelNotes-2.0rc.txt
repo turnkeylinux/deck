@@ -1,0 +1,21 @@
+====================
+v2.0rc Release Notes
+====================
+
+* complete rewrite of deck as a bash script, to support overlayFS (Debian
+  9/Stretch default union FS).
+
+* full and/or expected functionality of previous versions of deck (as per 
+  TKLDev docs) is not yet fully implemented (hence the 'rc' moniker). We 
+  hope to resolve that in a(n unyet) planned future release of Deck v2.0
+  proper.
+
+  Of particular importance to note:
+
+  - prior decks will appear empty; the actual files can be found in:
+
+    .deck/$deck_name/upper
+
+  - root.sandbox is still built, but previous functionality as documented in
+    TKLDev no longer holds true. Having said that, modifications made in
+    root.sandbox, will make it into the ISO, just not as a separate overlay.
