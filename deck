@@ -163,7 +163,7 @@ case $action in
     --ismounted)
         exit $(deck_ismounted ${args[0]});
         ;;
-    --show-layers)
+    --list-layers)
         deck_isdeck ${args[0]} || fatal "not deck";
         mountpath=$(realpath ${args[0]});
         deckdir=$(dirname $mountpath)/.deck/$(basename $mountpath);
