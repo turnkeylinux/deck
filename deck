@@ -22,7 +22,7 @@ Options:
     -m|--mount      - mounts a deck (the default)
     -u|--umount     - unmount a deck
     -D|--delete     - delete a deck
-    -v|--version    - echo pacakge version and exit
+    -v|--version    - echo package version and exit
 
     --isdeck        - test if path is a deck
     --isdirty       - test if deck is dirty
@@ -134,7 +134,7 @@ deck_version() {
     else
         echo "${version}"
     fi
-    exit 0         
+    exit 0
 }
 
 opts=()
