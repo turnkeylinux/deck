@@ -8,6 +8,8 @@
 # Free Software Foundation; either version 3 of the License, or (at your
 # option) any later version.
 
+VERSION=2.0+
+
 fatal() { echo "fatal: $@" 1>&2; exit 1; }
 
 usage() {
@@ -20,6 +22,7 @@ Options:
     -m|--mount      - mounts a deck (the default)
     -u|--umount     - unmount a deck
     -D|--delete     - delete a deck
+    -v|--version    - echo pacakge version and exit
 
     --isdeck        - test if path is a deck
     --isdirty       - test if deck is dirty
@@ -120,12 +123,27 @@ deck_ismounted() {
     mount | grep -q "^overlay on $mountpath type overlay" || return $?
 }
 
+deck_version() {
+    version="$(dpkg-query --showformat='${Version}' --show deck)"
+    no_pkg_string="dpkg-query: no packages found matching deck"
+    default=/usr/bin/deck
+    if [[ ${version} = ${no_pkg_string} ]]; then
+        echo "${VERSION}_non_packaged"
+    elif [[ ${0} != ${default} ]]; then
+        echo "${VERSION}_non_packaged"
+    else
+        echo "${version}"
+    fi
+    exit 0         
+}
 
 opts=()
 args=()
 while [[ -n "$1" ]]; do
     case "$1" in
         -h|--help)  usage;;
+        -v|--version)
+                    deck_version;;
         -*)         opts=("${opts[@]}" "$1");;
         *)          args=("${args[@]}" "$1");;
     esac
