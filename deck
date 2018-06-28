@@ -8,7 +8,7 @@
 # Free Software Foundation; either version 3 of the License, or (at your
 # option) any later version.
 
-VERSION=2.0+
+VERSION=2.0rc+
 
 fatal() { echo "fatal: $@" 1>&2; exit 1; }
 
@@ -124,16 +124,32 @@ deck_ismounted() {
 }
 
 deck_version() {
-    version="$(dpkg-query --showformat='${Version}' --show deck)"
-    no_pkg_string="dpkg-query: no packages found matching deck"
-    default=/usr/bin/deck
-    if [[ ${version} = ${no_pkg_string} ]]; then
-        echo "${VERSION}_non_packaged"
-    elif [[ ${0} != ${default} ]]; then
-        echo "${VERSION}_non_packaged"
+
+    unset version
+    if [[ -n $(readlink ${0}) ]]; then
+        bin_path="$(readlink ${0})"
     else
-        echo "${version}"
+        bin_path="${0}"
     fi
+    bin_dir="$(dirname ${bin_path})"
+    pkg_bin=/usr/bin/deck
+
+    if [[ -f ${bin_dir}/install.txt ]]; then
+        version="$(head -1 ${bin_dir}/install.txt)"
+    elif [[ -f ${bin_dir}/debian/changelog ]]; then
+        version="$(cd ${bin_dir} && dpkg-parsechangelog -ldebian/changelog -S Version)"
+    elif [[ -d ${bin_dir}/.git ]]; then
+        version="$(cd ${bin_dir} && autoversion HEAD)"
+    elif [[ ${bin_path} = ${pkg_bin} ]]; then
+        pkg_version="$(dpkg-query --showformat='${Version}' --show deck)"
+        no_pkg_string="dpkg-query: no packages found matching deck"
+        if [[ ${pkg_version} != ${no_pkg_string} ]]; then
+            version="${pkg_version}"
+        fi
+    fi
+    [[ -z ${version} ]] && version="${VERSION}"
+
+    echo "${version}"
     exit 0
 }
 
