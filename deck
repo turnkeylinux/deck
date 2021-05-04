@@ -33,10 +33,25 @@ EOF
 exit 1
 }
 
+real_path() {
+    if [[ -L "$1" ]] || [[ -d "$1" ]]; then
+        realpath "$1"
+    else
+        if [[ ! -f "$1" ]]; then
+            if [[ "$1" == "/"* ]]; then
+                echo "$1"
+            else
+                echo "$PWD/$1"
+            fi
+        else
+            fatal "Path '$1' is a file."
+        fi
+    fi
+}
+
 deck_mount() {
-    local parent=$(realpath "$1")
-    local mountpath=$(realpath "$2" 2>/dev/null)
-    [[ -n "$mountpath" ]] || local mountpath="$2"
+    local parent=$(real_path "$1")
+    local mountpath=$(real_path "$2")
     [[ -d "$parent" ]] || fatal 'parent does not exist'
     
     if [[ -d "$mountpath" ]]; then
@@ -67,7 +82,7 @@ deck_mount() {
 }
 
 deck_remount() {
-    local mountpath=$(realpath "$1")
+    local mountpath=$(real_path "$1")
     [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
     deck_ismounted "$mountpath" && fatal 'already mounted'
     deck_isdeck "$mountpath" || fatal 'not a deck'
@@ -77,14 +92,15 @@ deck_remount() {
 }
 
 deck_umount() {
-    local mountpath=$(realpath "$1")
+    local mountpath=$(real_path "$1")
     [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
     deck_ismounted "$mountpath" || fatal 'not mounted'
     umount "$mountpath"
 }
 
 deck_delete() {
-    local mountpath=$(realpath "$1")
+    local mountpath=$(real_path "$1" 2>/dev/null)
+
     local deckdir="$(dirname "$mountpath")/.deck/$(basename "$mountpath")"
     [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
     if deck_isdeck "$mountpath"; then
@@ -99,7 +115,7 @@ deck_delete() {
 }
 
 deck_isdirty() {
-    local mountpath=$(realpath "$1")
+    local mountpath=$(real_path "$1")
     local deckdir="$(dirname "$mountpath")/.deck/$(basename "$mountpath")"
     [[ -n "$(find "$deckdir/upper" -maxdepth 0 -empty)" ]] && return 1
     return 0
@@ -107,7 +123,7 @@ deck_isdirty() {
 
 deck_isdeck() {
     [[ -d "$1" ]] || return 1
-    local mountpath=$(realpath "$1")
+    local mountpath=$(real_path "$1")
     local deckdir="$(dirname "$mountpath")/.deck/$(basename "$mountpath")"
     [[ -d "$mountpath" ]] || return 1
     [[ -d "$deckdir" ]] || return 1
@@ -119,7 +135,7 @@ deck_isdeck() {
 }
 
 deck_ismounted() {
-    local mountpath=$(realpath "$1")
+    local mountpath=$(real_path "$1")
     [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
     mount | grep -q "^overlay on $mountpath type overlay" || return $?
 }
@@ -209,7 +225,7 @@ case $action in
         ;;
     --list-layers)
         deck_isdeck "$src" || fatal "not a deck: $src"
-        mountpath=$(realpath "$src")
+        mountpath=$(real_path "$src")
         deckdir="$(dirname "$mountpath")/.deck/$(basename "$mountpath")"
         echo "$deckdir/upper"
         tac "$deckdir/layers"
