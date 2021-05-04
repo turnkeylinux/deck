@@ -34,17 +34,15 @@ exit 1
 }
 
 real_path() {
-    if [[ -L "$1" ]] || [[ -d "$1" ]]; then
+    if [[ -d "$1" ]]; then
         realpath "$1"
+    elif [[ -f "$1" ]]; then
+        fatal "Path '$1' is a file."
     else
-        if [[ ! -f "$1" ]]; then
-            if [[ "$1" == "/"* ]]; then
-                echo "$1"
-            else
-                echo "$PWD/$1"
-            fi
+        if [[ "$1" == "/"* ]]; then
+            echo "$1"
         else
-            fatal "Path '$1' is a file."
+            echo "$PWD/$1"
         fi
     fi
 }
