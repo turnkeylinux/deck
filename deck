@@ -35,7 +35,8 @@ exit 1
 
 deck_mount() {
     local parent=$(realpath "$1")
-    local mountpath=$(realpath "$2")
+    local mountpath=$(realpath "$2" 2>/dev/null)
+    [[ -n "$mountpath" ]] || local mountpath="$2"
     [[ -d "$parent" ]] || fatal 'parent does not exist'
     
     if [[ -d "$mountpath" ]]; then
