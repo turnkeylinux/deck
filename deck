@@ -53,7 +53,7 @@ deck_mount() {
     [[ -d "$parent" ]] || fatal 'parent does not exist'
     
     if [[ -d "$mountpath" ]]; then
-        [[ -z $(find "$mountpath" -maxdepth 0 -empty) ]] || \
+        [[ -n $(find "$mountpath" -maxdepth 0 -empty) ]] || \
             fatal 'mountpath exists but not empty'
     fi
 
