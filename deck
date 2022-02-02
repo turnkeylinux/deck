@@ -104,18 +104,19 @@ deck_delete() {
     if deck_isdeck "$mountpath"; then
         find "$(dirname "$deckdir")" -name 'parent' -print | grep -q "^${mountpath}$" && \
             fatal 'cannot delete a parent deck'
-
         if deck_ismounted "$mountpath"; then
-           if ! umount "$mountpath" >/dev/null 2>&1; then
-               echo "warning: $mountpath is busy."
-               busy_paths=$(mount | sed -n "s|.*\($mountpath/[a-zA-Z0-9/]*\) .*|\1|p")
-               echo -e "info: Attempting to unmount busy paths:\n$busy_paths"
-               for busy_path in $busy_paths; do
-                   umount $busy_path || fatal "unmounting busy path $busy_path failed"
-               done
-               echo "Success, internal mounts unmounted."
-               umount "$mountpath" || fatal "Cannot unmount $mountpath"
-           fi
+            processes=$(fuser -m $mountpath 2>/dev/null)
+            [[ -z "$processes" ]] || fatal "Running processes are locking $mountpath."
+            if ! umount "$mountpath" >/dev/null 2>&1; then
+                submounts=$(mount | sed -n "s|.*\($mountpath/[a-zA-Z0-9/]*\) .*|\1|p")
+                [[ -n "$submounts" ]] || fatal "Unknown reason for failing 'umount $mountpath'."
+                echo -e "info: Attempting to unmount busy paths:\n$submounts"
+                for submount in $submounts; do
+                    umount $submount || fatal "unmounting busy path $submount failed"
+                done
+                echo "Success, internal mounts unmounted."
+                umount "$mountpath" || fatal "Cannot unmount $mountpath"
+            fi
         fi
         rm -rf "$deckdir"
     fi
