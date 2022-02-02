@@ -22,6 +22,8 @@ Options:
     -m|--mount      - mounts a deck (the default)
     -u|--umount     - unmount a deck
     -D|--delete     - delete a deck
+    -f|--force      - force kill processes running within deck (only relevant
+                      with -D|--delete or -u|--umount; otherwise ignored)
     -v|--version    - echo package version and exit
 
     --isdeck        - test if path is a deck
@@ -89,24 +91,18 @@ deck_remount() {
     deck_mount "$parent" "$mountpath"
 }
 
-deck_umount() {
+real_umount() {
     local mountpath=$(real_path "$1")
+    local force=$2
     [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
-    deck_ismounted "$mountpath" || fatal 'not mounted'
-    umount "$mountpath"
-}
-
-deck_delete() {
-    local mountpath=$(real_path "$1" 2>/dev/null)
-
-    local deckdir="$(dirname "$mountpath")/.deck/$(basename "$mountpath")"
-    [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
-    if deck_isdeck "$mountpath"; then
-        find "$(dirname "$deckdir")" -name 'parent' -print | grep -q "^${mountpath}$" && \
-            fatal 'cannot delete a parent deck'
-        if deck_ismounted "$mountpath"; then
-            processes=$(fuser -m $mountpath 2>/dev/null)
-            [[ -z "$processes" ]] || fatal "Running processes are locking $mountpath."
+    if deck_ismounted "$mountpath"; then
+        if [[ "$force" == "yes" ]]; then
+            fuser --kill $mountpath || fatal "Killing processes failed."
+            umount --recursive --force --lazy || fatal "Cannot unmount $mountpath"
+        else
+            processes=$(fuser --mount $mountpath 2>/dev/null)
+            [[ -z "$processes" ]] || \
+                fatal "Running processes locking $mountpath, try again with -f|--force to kill"
             if ! umount "$mountpath" >/dev/null 2>&1; then
                 submounts=$(mount | sed -n "s|.*\($mountpath/[a-zA-Z0-9/]*\) .*|\1|p")
                 [[ -n "$submounts" ]] || fatal "Unknown reason for failing 'umount $mountpath'."
@@ -114,9 +110,29 @@ deck_delete() {
                 for submount in $submounts; do
                     umount $submount || fatal "unmounting busy path $submount failed"
                 done
-                echo "Success, internal mounts unmounted."
                 umount "$mountpath" || fatal "Cannot unmount $mountpath"
             fi
+        fi
+    fi
+}
+
+deck_umount() {
+    local mountpath=$(real_path "$1")
+    local force=$2
+    deck_ismounted "$mountpath" || fatal 'not mounted'
+    real_umount "$mountpath" "$force"
+}
+
+deck_delete() {
+    local mountpath=$(real_path "$1" 2>/dev/null)
+    local force=$2
+    local deckdir="$(dirname "$mountpath")/.deck/$(basename "$mountpath")"
+    [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
+    if deck_isdeck "$mountpath"; then
+        find "$(dirname "$deckdir")" -name 'parent' -print | grep -q "^${mountpath}$" && \
+            fatal 'cannot delete a parent deck'
+        if deck_ismounted "$mountpath"; then
+            real_umount "$mountpath" "$force"
         fi
         rm -rf "$deckdir"
     fi
@@ -193,6 +209,15 @@ while [[ -n "$1" ]]; do
     shift
 done
 
+force=''
+for opt in ${opts[@]}; do
+    if [[ "$opt" == "-f" ]] || [[ "$opt" == "--force" ]]; then
+        force=yes
+        opts=${opts[@]/$opt}
+        args=${args[@]/$opt}
+    fi
+done
+
 [[ ${#args[@]} -eq 0 ]] && usage
 [[ ${#args[@]} -gt 2 ]] && fatal 'too many arguments'
 [[ ${#opts[@]} -gt 1 ]] && fatal 'conflicting deck options'
@@ -219,10 +244,10 @@ case $action in
         fi
         ;;
     -u|--umount)
-        deck_umount "$src"
+        deck_umount "$src" "$force"
         ;;
     -D|--delete)
-        deck_delete "$src"
+        deck_delete "$src" "$force"
         ;;
     --isdeck)
         exit $(deck_isdeck "$src")
