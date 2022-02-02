@@ -14,7 +14,7 @@ fatal() { echo "fatal: $@" 1>&2; exit 1; }
 
 usage() {
 cat<<EOF
-Deck a filesystem using overlayfs (experimental)
+Deck a filesystem using overlayfs
 Syntax: $(basename "$0") path/to/dir/or/deck path/to/new/deck
 Syntax: $(basename "$0") [ -option ] path/to/existing/deck
 
