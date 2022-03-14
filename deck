@@ -11,6 +11,7 @@
 VERSION=2.0rc+
 
 fatal() { echo "fatal: $@" 1>&2; exit 1; }
+warning() { echo "warning: $@" 1>&2; }
 
 usage() {
 cat<<EOF
@@ -48,6 +49,8 @@ real_path() {
         fi
     fi
 }
+
+[[ -z "$DEBUG" ]] || set -x
 
 deck_mount() {
     local parent=$(real_path "$1")
@@ -97,10 +100,10 @@ real_umount() {
     [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
     if deck_ismounted "$mountpath"; then
         if [[ "$force" == "yes" ]]; then
-            fuser --kill $mountpath || fatal "Killing processes failed."
+            fuser --kill $mountpath || warning "fuser --kill returned non-zero exit code."
             umount --recursive --force --lazy || fatal "Cannot unmount $mountpath"
         else
-            processes=$(fuser --mount $mountpath 2>/dev/null)
+            processes=$(fuser --mount $mountpath 2>/dev/null) || true
             [[ -z "$processes" ]] || \
                 fatal "Running processes locking $mountpath, try again with -f|--force to kill"
             if ! umount "$mountpath" >/dev/null 2>&1; then
@@ -198,24 +201,18 @@ deck_version() {
 
 opts=()
 args=()
+force=''
 while [[ -n "$1" ]]; do
     case "$1" in
         -h|--help)  usage;;
         -v|--version)
                     deck_version;;
+        -f|--force)
+                    force=yes;;
         -*)         opts=("${opts[@]}" "$1");;
         *)          args=("${args[@]}" "$1");;
     esac
     shift
-done
-
-force=''
-for opt in ${opts[@]}; do
-    if [[ "$opt" == "-f" ]] || [[ "$opt" == "--force" ]]; then
-        force=yes
-        opts=${opts[@]/$opt}
-        args=${args[@]/$opt}
-    fi
 done
 
 [[ ${#args[@]} -eq 0 ]] && usage
