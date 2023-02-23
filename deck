@@ -101,7 +101,7 @@ real_umount() {
     if deck_ismounted "$mountpath"; then
         if [[ "$force" == "yes" ]]; then
             fuser --kill $mountpath || warning "fuser --kill returned non-zero exit code."
-            umount --recursive --force --lazy || fatal "Cannot unmount $mountpath"
+            umount --recursive --force --lazy $mountpath || fatal "Cannot unmount $mountpath"
         else
             processes=$(fuser --mount $mountpath 2>/dev/null) || true
             [[ -z "$processes" ]] || \
