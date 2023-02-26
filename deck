@@ -110,7 +110,7 @@ real_umount() {
                 submounts=$(mount | sed -n "s|.*\($mountpath/[a-zA-Z0-9 /]*\) type.*|\1|p")
                 [[ -n "$submounts" ]] || fatal "Unknown reason for failing 'umount $mountpath'."
                 echo -e "info: Attempting to unmount busy paths:\n$submounts"
-                echo "$submounts" | while read submount; do
+                echo "$submounts" | while read -e submount; do
                     umount "$submount" || fatal "unmounting busy path $submount failed"
                 done
                 umount "$mountpath" || fatal "Cannot unmount $mountpath"
