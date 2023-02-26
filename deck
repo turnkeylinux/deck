@@ -59,7 +59,7 @@ deck_mount() {
     
     if [[ -d "$mountpath" ]]; then
         [[ $(find "$mountpath" -maxdepth 0 -empty) == "$mountpath" ]] || \
-            fatal 'mountpath exists but not empty'
+            fatal "mountpath (${mountpath}) exists but not empty"
     fi
 
     local deckdir="$(dirname "$mountpath")/.deck/$(basename "$mountpath")"
@@ -100,18 +100,18 @@ real_umount() {
     [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
     if deck_ismounted "$mountpath"; then
         if [[ "$force" == "yes" ]]; then
-            fuser --kill $mountpath || warning "fuser --kill returned non-zero exit code."
-            umount --recursive --force --lazy || fatal "Cannot unmount $mountpath"
+            fuser --kill "$mountpath" || warning "fuser --kill returned non-zero exit code."
+            umount --recursive --force --lazy "$mountpath" || fatal "Cannot unmount $mountpath"
         else
-            processes=$(fuser --mount $mountpath 2>/dev/null) || true
+            processes=$(fuser --mount "$mountpath" 2>/dev/null) || true
             [[ -z "$processes" ]] || \
                 fatal "Running processes locking $mountpath, try again with -f|--force to kill"
             if ! umount "$mountpath" >/dev/null 2>&1; then
-                submounts=$(mount | sed -n "s|.*\($mountpath/[a-zA-Z0-9/]*\) .*|\1|p")
+                submounts=$(mount | sed -n "s|.*\($mountpath/[a-zA-Z0-9 /]*\) type.*|\1|p")
                 [[ -n "$submounts" ]] || fatal "Unknown reason for failing 'umount $mountpath'."
                 echo -e "info: Attempting to unmount busy paths:\n$submounts"
-                for submount in $submounts; do
-                    umount $submount || fatal "unmounting busy path $submount failed"
+                echo "$submounts" | while read -e submount; do
+                    umount "$submount" || fatal "unmounting busy path $submount failed"
                 done
                 umount "$mountpath" || fatal "Cannot unmount $mountpath"
             fi
