@@ -6,6 +6,6 @@ Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.5
 
 Package: deck
-Architecture: any
+Architecture: all
 Depends: ${misc:Depends}
 Description: overlay-based virtual filesystem branching system
