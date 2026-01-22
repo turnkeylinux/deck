@@ -244,7 +244,13 @@ deck_version() {
 
 # check that overlay module is loaded
 if ! grep -q overlay <(lsmod); then
-    fatal "overlay module not loaded - load module and rerun"
+    warning "overlayfs module not loaded - attempting to load"
+    if modprobe overlay; then
+        echo "module loaded successfully, to auto load module everyboot run:"
+        echo "echo overlay > /etc/modules-load.d/overlayfs.conf"
+    else
+        fatal "Loading module failed"
+    fi
 fi
 
 # use fuse if not root (mount/umount require root)
