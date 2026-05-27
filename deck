@@ -66,7 +66,7 @@ deck_mount() {
 
     parent=$(real_path "$1")
     mountpath=$(real_path "$2")
-    [[ -d "$parent" ]] || fatal 'parent does not exist'
+    [[ -d "$parent" ]] || fatal "parent ($parent) does not exist"
     
     if [[ -d "$mountpath" ]]; then
         [[ $(find "$mountpath" -maxdepth 0 -empty) == "$mountpath" ]] || \
@@ -101,9 +101,9 @@ deck_remount() {
     local parent=
 
     mountpath=$(real_path "$1")
-    [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
-    deck_ismounted "$mountpath" && fatal 'already mounted'
-    deck_isdeck "$mountpath" || fatal 'not a deck'
+    [[ -d "$mountpath" ]] || fatal "mountpath does not exist: $mountpath"
+    deck_ismounted "$mountpath" && fatal "already mounted: $mountpath"
+    deck_isdeck "$mountpath" || fatal "not a deck: $mountpath"
     deckdir="$(dirname "$mountpath")/.deck/$(basename "$mountpath")"
     parent=$(cat "$deckdir/parent")
     deck_mount "$parent" "$mountpath"
@@ -113,7 +113,7 @@ real_umount() {
     local mountpath=
     mountpath=$(real_path "$1")
     local force=$2
-    [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
+    [[ -d "$mountpath" ]] || fatal "mountpath does not exist: $mountpath"
     if deck_ismounted "$mountpath"; then
         if [[ "$force" == "yes" ]]; then
             fuser --kill "$mountpath" \
@@ -129,14 +129,17 @@ real_umount() {
                 submounts=$(mount | \
                     sed -n "s|.*\($mountpath/[a-zA-Z0-9 /]*\) type.*|\1|p" \
                 )
-                [[ -n "$submounts" ]] \
-                    || fatal "Unknown reason for failing '${UMOUNT[*]} $mountpath'."
+                if [[ -z "$submounts" ]]; then
+                    fatal "Unknown reason for failing '${UMOUNT[*]}" \
+                        " $mountpath'."
+                fi
                 echo -e "info: Attempting to unmount busy paths:\n$submounts"
                 echo "$submounts" | while read -r submount; do
                     "${UMOUNT[@]}" "$submount" \
-                        || fatal "unmounting busy path $submount failed"
+                        || fatal "unmounting busy path ($submount) failed"
                 done
-                "${UMOUNT[@]}" "$mountpath" || fatal "Cannot unmount $mountpath"
+                "${UMOUNT[@]}" "$mountpath" \
+                    || fatal "Cannot unmount $mountpath"
             fi
         fi
     fi
@@ -144,7 +147,6 @@ real_umount() {
 
 deck_umount() {
     local mountpath=
-
     mountpath=$(real_path "$1")
     local force=$2
     deck_ismounted "$mountpath" || fatal "not mounted: $mountpath"
@@ -160,9 +162,9 @@ deck_delete() {
     deckdir="$(dirname "$mountpath")/.deck/$(basename "$mountpath")"
     [[ -d "$mountpath" ]] || fatal "mountpath does not exist: $mountpath"
     if deck_isdeck "$mountpath"; then
-        find "$(dirname "$deckdir")" -name 'parent' -print \
+        find "$(dirname "$deckdir")" -name "parent" -print \
             | grep -q "^${mountpath}$" \
-                    && fatal 'cannot delete a parent deck'
+                    && fatal "cannot delete a parent deck of $mountpath"
         if deck_ismounted "$mountpath"; then
             deck_umount "$mountpath" "$force"
         fi
@@ -201,7 +203,7 @@ deck_isdeck() {
 deck_ismounted() {
     local mountpath=
     mountpath=$(real_path "$1")
-    [[ -d "$mountpath" ]] || fatal 'mountpath does not exist'
+    [[ -d "$mountpath" ]] || fatal "mountpath does not exist: $mountpath"
     if [[ $(id -u) -eq 0 ]]; then
         grep_str="^overlay on $mountpath type overlay"
     else
@@ -249,7 +251,7 @@ if ! grep -q overlay <(lsmod); then
         echo "module loaded successfully, to auto load module everyboot run:"
         echo "echo overlay > /etc/modules-load.d/overlayfs.conf"
     else
-        fatal "Loading module failed"
+        fatal "Loading overlayfs module failed"
     fi
 fi
 
@@ -298,23 +300,21 @@ while [[ -n "$1" ]]; do
 done
 
 [[ ${#args[@]} -eq 0 ]] && usage
-[[ ${#opts[@]} -gt 1 ]] && fatal 'conflicting deck options'
-[[ ${#opts[@]} -eq 0 ]] && opts=('--mount')
+[[ ${#opts[@]} -gt 1 ]] && fatal "conflicting deck options"
+[[ ${#opts[@]} -eq 0 ]] && opts=(--mount)
 if [[ ${#args[@]} -gt 2 ]]; then
     if [[ -z "$umount" ]] && [[ -z "$delete" ]]; then
-        fatal 'too many arguments'
+        fatal "too many arguments"
     fi
 fi
 action=${opts[0]}
 
 case $action in
     -u|--umount|-D|--delete)
-        [[ ${#args[@]} -ge 1 ]] || fatal 'missing argument';;
+        [[ ${#args[@]} -ge 1 ]] || fatal "missing argument";;
     --isdeck|--ismounted|--show-layers)
-        [[ ${#args[@]} -eq 1 ]] || fatal 'missing argument';;
+        [[ ${#args[@]} -eq 1 ]] || fatal "missing argument";;
 esac
-
-lsmod | grep -q overlay || fatal 'overlay module not loaded'
 
 src="${args[0]}"
 maybe_dst="${args[1]}"
