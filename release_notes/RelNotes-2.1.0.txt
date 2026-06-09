@@ -1,0 +1,15 @@
+v1.1.0 Release Notes
+====================
+
+Add minor features and code improvements.
+    
+* New features:
+  - Support for deleting/unmounting multiple decks.
+  - Attempt loading of overlay kernel module if not already loaded.
+  - Preliminary (incomplete) support for unprivileged operation.
+  
+* General code updates/improvements:
+  - Support for debugging output.
+  - Prefer use of double quotes.
+  - Code linting - now shellcheck compliant.
+  - General code cleanup/quality improvement.
